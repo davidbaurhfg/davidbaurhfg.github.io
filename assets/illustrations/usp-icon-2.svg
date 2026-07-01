@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ebene_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 612 612">
+  <!-- Generator: Adobe Illustrator 30.6.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 109)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #1a1a1a;
+      }
+    </style>
+  </defs>
+  <path id="icon" class="st0" d="M306,612C137,612,0,475,0,306S137,0,306,0s306,137,306,306-137,306-306,306ZM306,556.4c138.3,0,250.4-112.1,250.4-250.4S444.3,55.6,306,55.6,55.6,167.7,55.6,306s112.1,250.4,250.4,250.4ZM445.1,278.2h-111.3v-139.1h-55.6v194.7h166.9v-55.6Z"/>
+</svg>

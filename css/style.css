@@ -1,0 +1,854 @@
+/* =====================================================================
+   TREFF. — Globales Stylesheet
+   Aufbau:  1) Fonts  2) Design-Tokens  3) Reset/Base  4) Layout-Utilities
+            5) Komponenten (Nav, Header/Loader, Buttons, Footer, Kontakt …)
+            6) Sektionen pro Seite   7) Responsive   8) Reduced-Motion
+   Farben & Schriften kommen 1:1 aus dem TREFF.-Designsystem.
+   ===================================================================== */
+
+/* ============================ 1) FONTS ============================== */
+@font-face {
+  font-family: "Chunko";
+  src: url("../fonts/Chunko Bold.woff2") format("woff2"),
+       url("../fonts/Chunko Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Tight";
+  src: url("../fonts/InterTight-Regular.woff2") format("woff2"),
+       url("../fonts/InterTight-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Tight";
+  src: url("../fonts/InterTight-Medium.woff2") format("woff2"),
+       url("../fonts/InterTight-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ========================= 2) DESIGN-TOKENS ======================== */
+:root {
+  /* ---- Markenfarben (eure Namen) ---- */
+  --lila-traube:      #9696FF;
+  --wilde-malve:      #E5B3FF;
+  --flammen-orange:   #FF4C02;
+  --schulbus-gelb:    #FFC800;
+  --helle-fichte:     #00812B;
+  --dunkle-fichte:    #004F1A;
+  --kieselstein:      #696969;
+  --carbon-schwarz:   #1A1A1A;
+  --carbon-schwarz-80: rgba(26, 26, 26, .8);
+  --schnee-weiss:     #FFFFFF;
+  --graue-strasse:    #E5E6E6;
+  --heller-stein-15:  rgba(230, 230, 230, .15);
+  --heller-stein-50:  rgba(230, 230, 230, .50);
+
+  /* ---- Rollen ---- */
+  --bg:        var(--schnee-weiss);
+  --fg:        var(--carbon-schwarz);
+  --accent:    var(--flammen-orange);
+  --muted:     var(--kieselstein);
+  --placeholder: var(--carbon-schwarz-80); /* graue Bild-Platzhalter */
+
+  /* ---- Schrift ---- */
+  --font-display: "Chunko", system-ui, sans-serif;
+  --font-body:    "Inter Tight", system-ui, sans-serif;
+
+  /* ---- Fluid Type-Scale (clamp: min, vw, max) ---- */
+  --fs-display: clamp(3.25rem, 1.5rem + 9vw, 11rem);   /* TREFF. / Störer */
+  --fs-h1:      clamp(2.25rem, 1.2rem + 3.6vw, 4rem);
+  --fs-h2:      clamp(1.7rem, 1.1rem + 2.2vw, 2.85rem);
+  --fs-h3:      clamp(1.3rem, 1rem + 1.2vw, 1.9rem);
+  --fs-lead:    clamp(1.1rem, 0.95rem + 0.7vw, 1.5rem);
+  --fs-body:    clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+  --fs-small:   clamp(0.8rem, 0.75rem + 0.2vw, 0.95rem);
+  --lh-tight: 1.05;
+  --lh-snug:  1.2;
+  --lh-body:  1.55;
+
+  /* ---- Spacing-Skala (4/8-Raster) ---- */
+  --space-1: .25rem;  --space-2: .5rem;   --space-3: .75rem;  --space-4: 1rem;
+  --space-5: 1.5rem;  --space-6: 2rem;    --space-7: 3rem;    --space-8: 4rem;
+  --space-9: 6rem;    --space-10: 8rem;
+  /* Vertikaler Section-Rhythmus (fluid) */
+  --section-pad: clamp(3.5rem, 2rem + 7vw, 9rem);
+
+  /* ---- Layout ---- */
+  --container-max: 1920px;
+  --content-max:   1520px;
+  --gutter: clamp(1.25rem, 0.5rem + 5vw, 8rem);
+
+  /* ---- Radius ---- */
+  --r-pill: 9999px;
+  --r-lg: 28px;
+  --r-md: 18px;
+  --r-sm: 12px;
+
+  /* ---- Schatten ---- */
+  --shadow-soft: 0 8px 30px rgba(26, 26, 26, .08);
+  --shadow-pill: 0 4px 14px rgba(26, 26, 26, .12);
+  --shadow-card: 0 18px 50px rgba(26, 26, 26, .12);
+
+  /* ---- Liquid Glass (Figma: Frost 7, Lichtwinkel -45°) ---- */
+  --glass-blur: 7px;
+  --glass-bg: var(--heller-stein-50);
+  --glass-border: rgba(255, 255, 255, .55);
+
+  /* ---- Motion ---- */
+  --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --t-fast: .18s;
+  --t-med: .32s;
+}
+
+/* ========================= 3) RESET / BASE ========================= */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  max-width: 100%;
+}
+/* Lenis steuert das Scrollen; native smooth-scroll deaktivieren wenn aktiv */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+img, picture, svg, video { display: block; max-width: 100%; }
+img, video { height: auto; }
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, select, textarea { font: inherit; color: inherit; }
+ul, ol { list-style: none; padding: 0; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+}
+
+:focus-visible { outline: 3px solid var(--flammen-orange); outline-offset: 3px; }
+
+/* ======================= 4) LAYOUT-UTILITIES ======================= */
+.container {                /* zentrierter Inhalt mit fluiden Rändern */
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.section { padding-block: var(--section-pad); overflow-x: clip; }  /* keine horizontale Auswucherung */
+.full-bleed { width: 100%; }   /* Störer etc. randlos */
+
+/* Kleines Label mit orangem Quadrat ("■ Modelle") */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: .6em;
+  font-family: var(--font-body); font-weight: 400;
+  font-size: var(--fs-body); color: var(--fg);
+}
+.eyebrow::before {
+  content: ""; width: .7em; height: .7em;
+  background: var(--flammen-orange); border-radius: 2px;
+}
+
+/* Section-Headline (Inter Tight, mittig) — z.B. Modelle/Projekte */
+.section-title {
+  font-family: var(--font-body); font-weight: 400;
+  font-size: var(--fs-h2); line-height: var(--lh-snug);
+  letter-spacing: -0.01em; text-align: center; text-wrap: balance;
+}
+
+/* ---- Bild-Platzhalter (bis echte Bilder eingelegt werden) ----
+   <figure class="img-slot" style="--ar: 16/9"><img …></figure>
+   Der dunkle Kasten bleibt sichtbar, falls die Bilddatei (noch) fehlt. */
+.img-slot {
+  position: relative;
+  background: var(--placeholder);
+  border-radius: 0;            /* Fotos & Videos: keine abgerundeten Ecken */
+  overflow: hidden;
+  aspect-ratio: var(--ar, 16 / 9);
+}
+.img-slot > img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* fehlt die Datei, liefert <img> kein Bild -> dunkler Kasten bleibt */
+.img-slot > img:not([src]),
+.img-slot > img[src=""] { opacity: 0; }
+
+/* Genereller, runder Pfeil-Button (orange Kreis) – site-weit */
+.arrow-btn {
+  display: grid; place-items: center;
+  width: 3.25rem; height: 3.25rem;
+  background: var(--flammen-orange); color: var(--schnee-weiss);
+  border-radius: var(--r-pill);
+  flex: 0 0 auto;
+}
+.arrow-btn svg { width: 45%; height: 45%; }
+
+/* ===================== 5) GLOBALE KOMPONENTEN ===================== */
+
+/* ---------- 5.1 Loader (Lade- & Cursor-Animation) ---------- */
+body.is-loading { overflow: hidden; }
+.loader {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--schnee-weiss);
+  display: grid; place-items: center;
+}
+.loader[hidden] { display: none; }
+.loader.is-cursor { cursor: none; }
+.loader__logo {                       /* füllbares TREFF.-Logo (Maske) */
+  position: relative;
+  width: clamp(180px, 32vw, 420px);
+  aspect-ratio: 995 / 213;
+  will-change: transform;
+}
+.loader.is-cursor .loader__logo {     /* im Cursor-Modus klein, JS positioniert */
+  position: fixed; top: 0; left: 0;
+  width: clamp(64px, 7vw, 96px);
+  margin: 0;
+}
+.loader__shape {                      /* SVG-Buchstabenmaske (clippt den Fill) */
+  position: absolute; inset: 0;
+  background: var(--kieselstein);     /* leerer Tank = sichtbares Grau (#696969) auf Weiß */
+  -webkit-mask: url("../assets/illustrations/logo-treff-wordmark.svg") center / contain no-repeat;
+          mask: url("../assets/illustrations/logo-treff-wordmark.svg") center / contain no-repeat;
+  overflow: hidden;
+}
+/* Steigender Wasser-Tank. JS treibt yPercent 101 -> 0.
+   Doppelt so hoch wie das Logo: unter dem Wellenkamm sitzt immer ein voller
+   Körper, der Farbverlauf (grau -> schwarz) kommt aus der Wellen-SVG. */
+.loader__fill {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  width: 100%; height: 200%;
+  transform: translateY(101%);        /* startet leer (unter den Buchstaben) */
+  will-change: transform;
+  pointer-events: none;
+}
+/* Prozedurale Wasserlinie: um genau eine Sinus-Periode breiter gerendert
+   (150 statt 100), damit der x-Drift nahtlos loopt (kein sichtbarer Sprung). */
+.loader__wave { position: absolute; top: 0; left: 0; width: 150%; height: 100%; display: block; }
+.loader__wave path { will-change: transform; }
+
+/* Intro-Zustand: gesamte Chrome ab dem ersten Frame verstecken.
+   visibility (NICHT display:none), damit .header__logo seine Layout-Box
+   behält und JS die finale Flugziel-Position exakt messen kann. */
+body.is-intro .nav {
+  transform: translateX(-50%) translateY(160%);   /* = .nav.is-hidden */
+  opacity: 0; pointer-events: none;
+}
+body.is-intro .header > * { visibility: hidden; }
+
+/* Reduced-Motion / ?still=1: keine Welle, flaches schwarzes Logo.
+   JS springt zusätzlich direkt in den Endzustand. */
+@media (prefers-reduced-motion: reduce) {
+  .loader__fill { transform: translateY(0%); }
+  .loader__wave { display: none; }
+  .loader__shape { background: var(--carbon-schwarz); }
+}
+
+/* ---------- 5.2 Nav Bar (Liquid Glass, fixed) ---------- */
+.nav {
+  position: fixed; z-index: 900;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  transition: transform var(--t-med) var(--ease-out), opacity var(--t-med);
+}
+.nav.is-hidden { transform: translateX(-50%) translateY(160%); opacity: 0; }
+.nav__inner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, .6);
+  border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow: 0 0 15px rgba(0, 0, 0, .15);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+          backdrop-filter: blur(var(--glass-blur));
+  overflow: hidden;
+}
+.nav__pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 43px; padding-inline: 18px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-body); font-weight: 500; font-size: 1rem; line-height: 1; /* Nav-Buttons: bewusst Inter Tight Medium */
+  white-space: nowrap;
+  transition: background-color var(--t-med) var(--ease-out), color var(--t-med) var(--ease-out);
+  will-change: transform;
+}
+.nav__pill svg { width: 1.05em; height: 1.05em; }
+.nav__pill--cta svg { width: 8px; height: 8px; }  /* Pfeil 8×8 px wie Spec */
+.nav__pill--home  { width: 43px; padding: 0; background: var(--flammen-orange); color: #fff; }
+.nav__pill--home svg { width: 17px; height: 16px; }
+.nav__pill--text  { background: #fff; color: var(--carbon-schwarz); box-shadow: 0 0 15px rgba(0,0,0,.15); }
+.nav__pill--cta   { background: var(--flammen-orange); color: #fff; }
+/* Hover-Farben laut Spec (Bewegung kommt per JS .js-bounce) */
+@media (hover: hover) {
+  .nav__pill--home:hover { background: var(--lila-traube); color: #fff; }
+  .nav__pill--text:hover { background: var(--dunkle-fichte); color: #fff; }
+  .nav__pill--cta:hover  { background: var(--schulbus-gelb); color: var(--carbon-schwarz); }
+}
+
+/* ---------- 5.3 Buttons / Pills allgemein ---------- */
+.btn-pill {                           /* weiße umrandete Pille, z.B. "Mehr Anzeigen" */
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 3.25rem; padding-inline: 1.6rem;
+  border: 1px solid var(--carbon-schwarz);
+  border-radius: var(--r-pill);
+  background: #fff; color: var(--carbon-schwarz);
+  font-weight: 400; white-space: nowrap;
+  transition: background-color var(--t-med) var(--ease-out), color var(--t-med) var(--ease-out);
+}
+@media (hover: hover) { .btn-pill:hover { background: var(--carbon-schwarz); color: #fff; } }
+/* ---- Generator-CTA: Pille + Kreis, die beim Hover „verschmelzen" ----
+   Unhovered:  [ Pille mit Text ]   ( Kreis+Pfeil )   (getrennt, Lücke)
+   Hovered:    Pille wächst nach rechts und umfließt den Kreis; der Kreis
+               rutscht minimal nach links in die Pille hinein. Leicht bouncy.
+   Neu: Pille hat immer die volle Merge-Breite (padding-right fest, nie animiert).
+   clip-path blendet den rechten Teil ein/aus (GPU-only, kein Layout-Reflow).
+   margin-left am Kreis kompensiert die vorauskalkulierte Extra-Breite der Pille.
+   → kein Layout-Property wird je animiert → kein vertikaler Sprung, kein Frame-Shift. */
+.cta {
+  --cta-h: clamp(3.25rem, 2.9rem + 1.6vw, 4.5rem);
+  --cta-circle: clamp(2.7rem, 2.4rem + 1.3vw, 3.5rem);
+  --cta-gap: .5rem;
+  --cta-inset: calc((var(--cta-h) - var(--cta-circle)) / 2);
+  --cta-pad: clamp(1.5rem, 1.2rem + .9vw, 2rem);
+  --cta-move: 1rem;
+  --cta-grow: calc(var(--cta-circle) + var(--cta-gap) + var(--cta-inset) - var(--cta-move));
+  display: inline-flex; align-items: center; vertical-align: middle;
+  height: var(--cta-h);
+}
+.cta__pill {
+  display: inline-flex; align-items: center; height: var(--cta-h);
+  padding: 0 var(--cta-pad);
+  padding-right: calc(var(--cta-pad) + var(--cta-grow)); /* immer volle Breite, nie animiert */
+  background: transparent; color: var(--carbon-schwarz);
+  font-weight: 400; font-size: clamp(1rem, .9rem + .45vw, 1.25rem); white-space: nowrap;
+  position: relative; z-index: 1;
+  transition: color .3s var(--ease-out);
+}
+/* Geschlossene Pillen-Kontur + weiße Füllung als eigene Ebene hinter dem Text.
+   Die rechte Kante wird per `right` von der vollen Merge-Breite eingezogen
+   (= alte clip-path-Wirkung), zeichnet aber einen ECHTEN Rahmen rundum:
+   Unhovered → geschlossene Pille (Outline komplett sichtbar), Hover → wächst
+   nach rechts auf. Absolut positioniert → kein Flex/Grid-Reflow, kein Sprung. */
+.cta__pill::before {
+  content: ""; position: absolute; z-index: -1;
+  top: 0; bottom: 0; left: 0; right: var(--cta-grow);
+  background: #fff;
+  border: 1px solid var(--carbon-schwarz); border-radius: var(--r-pill);
+  transition: right .45s var(--ease-out), background-color .3s var(--ease-out);
+}
+.cta__circle {
+  position: relative; z-index: 2; flex: 0 0 auto;
+  display: grid; place-items: center;
+  width: var(--cta-circle); height: var(--cta-circle); border-radius: 50%;
+  margin-left: calc(var(--cta-gap) - var(--cta-grow)); /* negativ: kompensiert Extra-Breite der Pille */
+  background: var(--flammen-orange); color: var(--schnee-weiss);
+  transition: transform .45s var(--ease-out), background-color .3s var(--ease-out);
+}
+.cta__circle svg { width: 8px; height: 8px; }
+/* Hover-IN: Kontur öffnet nach rechts auf, Kreis gleitet mit leichtem Bounce rein */
+.cta:focus-within .cta__pill::before, .cta.is-hover .cta__pill::before {
+  right: 0;
+  transition: right .5s var(--ease-out), background-color .3s var(--ease-out);
+}
+.cta:focus-within .cta__circle, .cta.is-hover .cta__circle {
+  transform: translateX(calc(-1 * var(--cta-move)));
+  transition: transform .55s var(--ease-bounce), background-color .3s var(--ease-out);
+}
+@media (hover: hover) {
+  .cta:hover .cta__pill::before {
+    right: 0;
+    transition: right .5s var(--ease-out), background-color .3s var(--ease-out);
+  }
+  .cta:hover .cta__circle {
+    transform: translateX(calc(-1 * var(--cta-move)));
+    transition: transform .55s var(--ease-bounce), background-color .3s var(--ease-out);
+  }
+}
+
+/* ---------- 5.4 Header / Hero ---------- */
+.header {
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  padding: clamp(4rem, 9vw, 10rem) var(--gutter) clamp(2rem, 5vw, 5rem);
+  text-align: center;
+}
+.header__logo {
+  width: min(72vw, 995px);
+  aspect-ratio: 995 / 213;
+}
+.header__logo img { width: 100%; height: 100%; object-fit: contain; }
+.header > .header__hero {       /* > .header__hero: schlägt `.header > * { max-width:100% }` (Z.756) */
+  /* Bricht aus dem Header-Gutter aus → exakt 32px Rand links/rechts zum Viewport.
+     Breite kompensiert die negativen Margins, daher symmetrisch zentriert. */
+  width: calc(100% + 2 * var(--gutter) - 64px);
+  max-width: none;
+  margin-inline: calc(32px - var(--gutter));
+  aspect-ratio: 1856 / 1044;
+  --ar: 1856 / 1044;
+}
+
+/* ---------- 5.5 Footer ---------- */
+.footer {
+  background: var(--lila-traube);
+  color: var(--carbon-schwarz);
+  padding: clamp(3.5rem, 7vw, 10rem) var(--gutter) clamp(4rem, 9vw, 12rem);
+}
+.footer__grid {
+  display: grid; gap: clamp(2.5rem, 5vw, 5rem);
+  grid-template-columns: 1fr;
+  align-items: start;
+  max-width: var(--content-max); margin-inline: auto;
+}
+.footer__logo { width: min(420px, 72%); }
+.footer__logo img { width: 100%; height: auto; aspect-ratio: 432 / 257; object-fit: contain; }
+.footer__cols {
+  display: grid; gap: clamp(1.5rem, 3vw, 3rem);
+  grid-template-columns: repeat(3, max-content);
+}
+.footer address { font-style: normal; line-height: 1.7; }
+.footer__links li { line-height: 2; }
+.footer__links a { position: relative; display: inline-block; transition: transform var(--t-fast) var(--ease-out); }
+@media (hover: hover) {
+  .footer__links a::after {
+    content: ""; position: absolute; left: 0; bottom: -2px; height: 2px; width: 100%;
+    background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform var(--t-med) var(--ease-out);
+  }
+  .footer__links a:hover { transform: translateX(4px); }
+  .footer__links a:hover::after { transform: scaleX(1); }
+}
+@media (min-width: 900px) {
+  .footer__grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+}
+
+/* ---------- 5.6 Kontakt-Formular ---------- */
+.kontakt { }
+.kontakt__head { display: flex; flex-direction: column; gap: 1.25rem; }
+.kontakt__title { font-family: var(--font-body); font-weight: 400; font-size: var(--fs-h1); line-height: var(--lh-tight); }
+.form-card {
+  border: 1px solid var(--carbon-schwarz);
+  border-radius: var(--r-lg);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  display: flex; flex-direction: column; gap: 1rem;
+  background: #fff;
+}
+.field {
+  display: flex; align-items: center; gap: .75rem;
+  height: 3.5rem; padding-inline: 1.4rem;
+  border: 1px solid var(--carbon-schwarz);
+  border-radius: var(--r-pill);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast) var(--ease-out);
+}
+.field:focus-within { border-color: var(--flammen-orange); box-shadow: 0 0 0 3px rgba(255,76,2,.15); transform: translateY(-1px); }
+.field input, .field select {
+  border: 0; outline: 0; background: transparent; width: 100%; height: 100%;
+}
+.field--row { display: grid; grid-template-columns: auto 1fr; }
+.form-row { display: grid; grid-template-columns: auto 1fr; gap: .75rem; }
+.form-actions { display: flex; justify-content: flex-end; align-items: center; gap: .6rem; margin-top: .25rem; }
+
+/* ---------- 5.7 Störer (randlose Farbbanner mit Display-Headline) ---------- */
+.stoerer {
+  display: grid; place-items: center;
+  padding: clamp(3rem, 7vw, 7rem) var(--gutter);
+  text-align: center;
+}
+.stoerer h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  line-height: .98; text-transform: uppercase; letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.stoerer--gelb   { background: var(--schulbus-gelb); color: var(--carbon-schwarz); }
+.stoerer--lila   { background: var(--lila-traube);   color: var(--carbon-schwarz); }
+.stoerer--gruen  { background: var(--helle-fichte);  color: var(--schnee-weiss); }
+.stoerer--malve  { background: var(--wilde-malve);   color: var(--carbon-schwarz); }
+
+/* ---------- 5.8 Generische Galerie-/Karten-Primitive ---------- */
+.gallery-big { display: grid; gap: clamp(1rem, 2vw, 1.75rem); }
+.gallery-big--2 { grid-template-columns: repeat(2, 1fr); }
+.deco { pointer-events: none; user-select: none; }
+
+/* ==================== 6) LANDING-SEKTIONEN ======================= */
+.stack-center { display: flex; flex-direction: column; align-items: center; gap: clamp(1.5rem, 3vw, 2.5rem); text-align: center; }
+.stack-center .section-title, .stack-center .eyebrow { margin-inline: auto; }
+.section > .container + .container { margin-top: clamp(2.5rem, 5vw, 4.5rem); }
+
+/* Eyebrow-Größe & Farbvarianten (Figma: 16px-Quadrat + 24px Text) */
+.eyebrow { font-size: clamp(1.05rem, .9rem + .55vw, 1.5rem); gap: .5em; }
+.eyebrow::before { width: .65em; height: .65em; border-radius: 2px; }
+.eyebrow--gelb::before  { background: var(--schulbus-gelb); }
+.eyebrow--gruen::before { background: var(--helle-fichte); }
+.eyebrow--lila::before  { background: var(--lila-traube); }
+
+/* Große Aussagesätze (42–48px Inter Tight) */
+.big-statement { font-size: clamp(1.5rem, 1rem + 2.2vw, 2.6rem); line-height: 1.28; text-wrap: balance; }
+
+/* ---------- Karussell (Projekte / USP) ---------- */
+.carousel { position: relative; margin-top: clamp(2rem, 4vw, 3.5rem); }
+.carousel__track {
+  display: flex; gap: clamp(1rem, 2vw, 1.75rem);
+  padding-inline: var(--gutter);
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; cursor: grab;
+  scrollbar-width: none;
+}
+.carousel__track::-webkit-scrollbar { display: none; }
+.carousel__track.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+/* Slider-Insets (nur Projekte-Karussell, USP-Schiene bleibt unberührt):
+   Start 212px links · feste 32px-Abschneidekante links · Ende 212px rechts. */
+.carousel__track {
+  margin-left: 32px;              /* Scroll-Viewport beginnt bei 32px → linke Abschneidekante */
+  padding-left: 180px;            /* 32 + 180 = 212px Startabstand der ersten Card */
+  padding-right: 212px;           /* Endabstand rechts beim Durchscrollen */
+  scroll-padding-left: 180px;     /* Snap-/Scroll-Ausrichtung = 212px vom Viewport */
+  scroll-snap-type: x proximity;  /* proximity statt mandatory → Ende (212px rechts) frei erreichbar */
+}
+.carousel__dots { display: flex; align-items: center; gap: .6rem; justify-content: flex-end; padding-inline: var(--gutter); margin-top: 1.5rem; }
+.carousel__dots button {
+  position: relative; overflow: hidden;
+  width: 20px; height: 5px; padding: 0; border: 0; border-radius: 2.5px;   /* inaktiver Balken 20×5 */
+  background: var(--graue-strasse);                                         /* #E5E6E6 */
+  transition: width .55s var(--ease-out);                                  /* weicher Größenwechsel 20↔80 */
+}
+.carousel__dots button.is-active { width: 80px; }                          /* aktiver Balken 80×5 */
+.carousel__dots button .fill {                                             /* orange Füllung, wischt in Scrollrichtung ein */
+  position: absolute; inset: 0; border-radius: inherit;
+  background: var(--flammen-orange);
+  transform: scaleX(0);
+  transform-origin: var(--fill-origin, left) center;
+  transition: transform .5s var(--ease-out);                               /* weiches, gerichtetes Füllen */
+  will-change: transform;
+}
+.carousel__dots button.is-active .fill { transform: scaleX(1); }
+
+.proj-card { flex: 0 0 584px; scroll-snap-align: start; }   /* Zielbreite 584px (Bild 584×617 via --ar) */
+.proj-card__img { transition: transform var(--t-med) var(--ease-out); }
+.proj-card__img img { transition: transform .6s var(--ease-out); }
+@media (hover: hover) {
+  .proj-card:hover .proj-card__img img { transform: scale(1.05); }
+}
+.proj-card__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1.1rem; }
+.proj-card__meta { display: flex; flex-direction: column; gap: .25rem; }
+.proj-card__title, .modell-card__title { font-weight: 400; font-size: clamp(1.1rem, 1.5vw, 1.4rem); }
+.proj-card__sub, .modell-card__sub { color: var(--kieselstein); font-size: var(--fs-small); }
+
+/* ---------- Karten-Raster (USP-Vorteile + Modell-Specs) ----------
+   Gemeinsame Komponente: feste 280×168-Karten, strikt 4 pro Reihe.
+   Raster degradiert 4 → 2 → 1 Spalte; Kartengröße bleibt IMMER 280×168.
+   `.card-grid` ist linksbündig (USP), `.card-grid--end` rechtsbündig (Specs). */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 280px);
+  gap: 16px;
+  justify-content: start;
+}
+@media (min-width: 620px)  { .card-grid { grid-template-columns: repeat(2, 280px); } }
+@media (min-width: 1320px) { .card-grid { grid-template-columns: repeat(4, 280px); } }
+.card-grid--end { justify-content: end; }
+
+.card-pill {
+  width: 280px; height: 168px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;
+  padding: 24px;
+  border: 1px solid var(--carbon-schwarz); border-radius: 40px;
+  background: #fff;
+  transition: transform var(--t-med) var(--ease-out), box-shadow var(--t-med);
+}
+@media (hover: hover) { .card-pill:hover { transform: translateY(-8px); box-shadow: var(--shadow-card); } }
+
+/* ---------- USP-Karten ---------- */
+.usp__head { display: flex; flex-direction: column; gap: 1.25rem; }
+.usp__title { font-family: var(--font-body); font-weight: 400; font-size: clamp(1.6rem, 1rem + 2.4vw, 2.6rem); line-height: 1.2; }
+.usp-card p { font-weight: 400; font-size: clamp(1.15rem, 1.5vw, 1.5rem); line-height: 1.15; }
+/* Icon visuell ~36×36, nie verzerrt: feste Box + object-fit:contain hält die Original-Proportionen. */
+.usp-card__icon { width: 36px; height: 36px; object-fit: contain; object-position: left center; flex: 0 0 auto; }
+
+/* ---------- Text Störer 2 ---------- */
+.text-stoerer__row { display: flex; align-items: center; gap: clamp(2rem, 5vw, 6rem); }
+.text-stoerer__row--a { justify-content: space-between; }
+.text-stoerer__row--b { justify-content: space-between; margin-top: clamp(3rem, 8vw, 8rem); }
+.text-stoerer__big { font-size: clamp(1.5rem, 1rem + 2.4vw, 3rem); line-height: 1.18; flex: 1 1 60%; }
+.text-stoerer__row--a .text-stoerer__big { text-align: right; }
+.text-stoerer__illu { width: clamp(140px, 22vw, 360px); height: auto; flex: 0 0 auto; }
+
+/* ---------- Konzept ---------- */
+.konzept__grid { display: grid; gap: clamp(1rem, 2vw, 1.5rem); grid-template-columns: 1fr; }
+@media (min-width: 760px) { .konzept__grid { grid-template-columns: repeat(3, 1fr); } }
+.konzept-pille {
+  border: 1px solid var(--carbon-schwarz); border-radius: 40px;
+  padding: clamp(2rem, 3vw, 4rem) clamp(1.25rem, 2vw, 2rem) 2rem;
+  display: flex; flex-direction: column; align-items: center; gap: clamp(2rem, 4vw, 4rem);
+}
+.tag-list { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+.tag-list li {
+  border: 1px solid var(--carbon-schwarz); border-radius: var(--r-pill);
+  padding: .85rem 1.6rem; font-size: clamp(.95rem, 1.2vw, 1.25rem); line-height: 1.2;
+  transition: transform var(--t-fast) var(--ease-out), background-color var(--t-fast), color var(--t-fast);
+}
+.tag-list li::before { content: "• "; }
+@media (hover: hover) { .tag-list li:hover { transform: translateY(-3px); } }
+
+/* ---------- Säulen Text (Aufbau) ---------- */
+.saeulen .container { position: relative; }
+.saeulen__illu { width: 100%; max-width: 1133px; height: auto; margin-bottom: clamp(2rem, 5vw, 5rem); }
+.saeulen__text { max-width: 1040px; }
+
+/* ---------- PHASEN (Scrollytelling) ---------- */
+.phasen__wrap { position: relative; display: flex; flex-direction: column; gap: clamp(2.5rem, 6vw, 6rem); padding-block: 2rem; }
+.phasen__lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.phasen__lines path { fill: none; stroke: var(--carbon-schwarz); stroke-width: 2; }
+.phase { display: flex; align-items: center; gap: clamp(1rem, 3vw, 3rem); transition: color var(--t-med) var(--ease-out); }
+.phase--right { justify-content: flex-end; }
+.phase--left { justify-content: flex-start; flex-direction: row-reverse; }
+.phase__num { font-family: var(--font-body); font-weight: 400; font-size: clamp(1rem, 1.4vw, 1.5rem); color: inherit; white-space: nowrap; }
+.phase__pille {
+  position: relative; max-width: min(560px, 80%);
+  border: 1px solid currentColor; border-radius: 32px;
+  padding: clamp(1.5rem, 2.5vw, 2.5rem);
+  display: flex; flex-direction: column; gap: .9rem; background: var(--bg);
+}
+.phase__pille::before, .phase__pille::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 13px; height: 13px; background: currentColor; border-radius: 3px;
+}
+.phase__pille::before { top: -7px; }
+.phase__pille::after  { bottom: -7px; }
+.phase:first-child .phase__pille::before { display: none; } /* P1 keine obere Verbindung */
+.phase__title { font-family: var(--font-body); font-weight: 400; font-size: clamp(1.3rem, 2vw, 2rem); line-height: 1.1; }
+.phase__desc { font-size: clamp(.95rem, 1.1vw, 1.15rem); line-height: 1.5; color: inherit; max-width: 42ch; }
+/* aktiv = volle Farbe, sonst zurückgenommen (Farbe statt Opacity) */
+.phase { color: var(--carbon-schwarz); }
+.phase.is-dim { color: var(--heller-stein-50, #cfcfcf); }
+.phase.is-dim { color: #c9c9c9; }
+.phasen__end { display: flex; justify-content: center; margin-top: clamp(1rem, 3vw, 3rem); }
+.container-badge {
+  background: var(--carbon-schwarz); border-radius: 18px;
+  padding: clamp(1.4rem, 2.5vw, 2.4rem) clamp(1.8rem, 3.5vw, 3.5rem);
+  display: grid; place-items: center;
+  box-shadow: var(--shadow-card);
+}
+.container-badge img { width: clamp(120px, 16vw, 230px); height: auto; filter: invert(1) brightness(2); }
+
+/* ---------- Modelle ---------- */
+.modelle__grid { display: grid; gap: clamp(1.25rem, 3vw, 2.5rem); grid-template-columns: 1fr; }
+@media (min-width: 760px) { .modelle__grid { grid-template-columns: repeat(2, 1fr); } }
+.modell-card { display: flex; flex-direction: column; }
+.modell-card__img img { transition: transform .6s var(--ease-out); }
+@media (hover: hover) { .modell-card:hover .modell-card__img img { transform: scale(1.04); } }
+.modell-card__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1.1rem; }
+.modell-card__meta { display: flex; flex-direction: column; gap: .3rem; }
+
+/* ---------- FAQ ---------- */
+.faq__layout { display: grid; gap: clamp(2rem, 4vw, 4rem); grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 900px) { .faq__layout { grid-template-columns: max-content 1fr; gap: clamp(3rem, 6vw, 8rem); } }
+.faq__list { display: flex; flex-direction: column; gap: clamp(1rem, 2vw, 1.75rem); }
+/* Eingeklappt: vollständige Pille (var(--r-pill) → rendert als halbe Höhe).
+   Geöffnet: 40px-Rundung (Panel-Optik). Das Radius-Morphing treibt faq.js per
+   GSAP synchron zur Höhe; CSS hält nur die Ziel-/Ruhewerte + den weichen BG-Wechsel. */
+.faq-item {
+  border: 1px solid var(--carbon-schwarz); border-radius: var(--r-pill);
+  overflow: hidden; background: #fff;
+  transition: background-color .5s var(--ease-out);
+}
+.faq-item.is-open { background: rgba(230, 230, 230, .3); border-radius: 40px; }
+.faq-item summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  padding: clamp(1.4rem, 2.2vw, 2.2rem) clamp(1.75rem, 3vw, 3.5rem);
+  font-size: clamp(1.05rem, 1.4vw, 1.5rem); line-height: 1.3;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item__icon { position: relative; width: 24px; height: 24px; flex: 0 0 auto; }
+.faq-item__icon::before, .faq-item__icon::after {
+  content: ""; position: absolute; inset: 0; margin: auto; background: var(--carbon-schwarz);
+  transition: transform .5s var(--ease-out);
+}
+.faq-item__icon::before { width: 100%; height: 2px; }   /* — */
+.faq-item__icon::after  { width: 2px; height: 100%; }   /* | */
+.faq-item.is-open .faq-item__icon::after { transform: rotate(90deg); } /* + -> × (zu —) */
+.faq-item.is-open .faq-item__icon::before { transform: rotate(180deg); }
+/* Body wird höhen-animiert → KEIN Padding (sonst floor't die border-box-Höhe auf padding-bottom:
+   die Höhe bleibt beim Schließen bei ~padding-bottom „kleben" und springt am Ende hart auf 0).
+   Padding lebt auf .faq-item__inner; overflow:hidden klippt den Inner beim Kollabieren sauber. */
+.faq-item__body { overflow: hidden; }
+.faq-item__inner { padding: 0 clamp(1.75rem, 3vw, 3.5rem) clamp(1.6rem, 2.5vw, 2.5rem); }
+.faq-item__body p { color: var(--carbon-schwarz-80); font-size: clamp(1rem, 1.2vw, 1.25rem); max-width: 60ch; }
+
+/* ---------- Kontakt ---------- */
+.kontakt__grid { display: grid; gap: clamp(2rem, 5vw, 5rem); grid-template-columns: 1fr; align-items: center; }
+@media (min-width: 820px) { .kontakt__grid { grid-template-columns: minmax(0, .8fr) minmax(0, 1.1fr); } }
+.field--code { border: 1px solid var(--carbon-schwarz); justify-content: center; white-space: nowrap; }
+.field__chevron { transform: rotate(90deg); color: var(--kieselstein); transition: transform var(--t-med) var(--ease-out); }
+.form-row { grid-template-columns: auto 1fr; }
+
+/* Custom-Dropdown (Modell-Auswahl) */
+.dropdown { position: relative; }
+.dropdown__toggle { width: 100%; justify-content: space-between; cursor: pointer; text-align: left; }
+.dropdown__value.is-placeholder { color: var(--kieselstein); }
+.dropdown__menu {
+  position: absolute; top: calc(100% + .5rem); left: 0; right: 0; z-index: 30;
+  display: none; flex-direction: column; gap: .25rem;
+  background: #fff; border: 1px solid var(--carbon-schwarz);
+  border-radius: 1.25rem; padding: .5rem; box-shadow: var(--shadow-card);
+}
+.dropdown.is-open .dropdown__menu { display: flex; }
+.dropdown.is-open .field__chevron { transform: rotate(-90deg); }
+.dropdown__option {
+  padding: .85rem 1.1rem; border-radius: var(--r-pill); cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease-out), transform var(--t-fast);
+}
+.dropdown__option:hover, .dropdown__option[aria-selected="true"] { background: var(--graue-strasse); }
+@media (hover: hover) { .dropdown__option:hover { transform: translateX(3px); } }
+
+/* Ländervorwahl-Dropdown (Telefon-Feld): schmale Pille, aber Menü so breit wie nötig. */
+.dropdown--code .dropdown__menu { right: auto; min-width: max-content; max-height: 18rem; overflow-y: auto; }
+.dropdown--code .dropdown__option { display: flex; align-items: center; gap: .6rem; }
+.dropdown--code .code__dial { color: var(--kieselstein); min-width: 2.9rem; }
+.dropdown--code .code__name { white-space: nowrap; }
+
+/* ---------- Video ---------- */
+.video-slot video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ==================== 7) UNTERSEITEN ============================= */
+/* Seiten ohne großen Header brauchen Platz unter der fixen Nav */
+.page-top { padding-top: clamp(7rem, 14vh, 11rem); }
+
+/* Subpage-Header: großer Titel (Chunko) + Hero-Bild */
+.subhead {
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  padding: clamp(7rem, 12vh, 11rem) var(--gutter) clamp(1rem, 3vw, 3rem);
+  text-align: center;
+}
+.subhead__title {
+  font-family: var(--font-display); font-size: 280px;
+  text-transform: uppercase; line-height: .95; letter-spacing: -0.01em;
+}
+.subhead > .subhead__hero {     /* > .subhead__hero: schlägt `.subhead > * { max-width:100% }` (Z.756) */
+  /* Bricht aus dem Gutter aus → exakt 32px Rand links/rechts zum Viewport. */
+  --ar: 1792 / 980;
+  width: calc(100% + 2 * var(--gutter) - 64px);
+  max-width: none;
+  margin-inline: calc(32px - var(--gutter));
+}
+
+/* Kleiner Text (Intro): Eyebrow links, Fließtext rechts */
+.kleiner-text .container { display: grid; gap: clamp(1.5rem, 4vw, 4rem); grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 820px) { .kleiner-text .container { grid-template-columns: max-content 1fr; } }
+.kleiner-text__copy { font-size: clamp(1.05rem, .95rem + .7vw, 1.5rem); line-height: 1.5; max-width: 60ch; }
+
+/* Specs — nutzt die gemeinsame .card-pill / .card-grid-Komponente (siehe USP).
+   Kopf linksbündig, Pillen-Grid rechtsbündig (.card-grid--end), Text in der Karte links. */
+.specs__head { display: flex; flex-direction: column; gap: clamp(.75rem, 2vw, 1.25rem); }
+.specs__head .section-title { text-align: left; }
+.spec { justify-content: flex-end; gap: .4rem; }   /* Label + Wert als Paar, unten linksbündig (wie USP-Text) */
+.spec__label { color: var(--kieselstein); font-size: var(--fs-small); }
+.spec__value { font-weight: 400; font-size: clamp(1.05rem, 1.3vw, 1.35rem); line-height: 1.12; }
+
+/* video-sec: komplett randabfallend (kein seitlicher Gutter, keine Max-Breite). */
+.video-sec > .container {
+  max-width: none;
+  padding-inline: 0;
+}
+/* galerie-gross: volle Breite, aber genau 32px Rand links/rechts zum Viewport. */
+.galerie-gross > .container {
+  max-width: none;
+  padding-inline: 32px;
+}
+
+/* Bildgalerie Groß: flexible Bildraster, 16px Gap zwischen den Bildframes (h & v) */
+.galerie-gross__grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+.galerie-gross__grid.cols-2 { grid-template-columns: 1fr; }
+@media (min-width: 720px) {
+  .galerie-gross__grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .galerie-gross__grid.split { grid-template-columns: 1.7fr 1fr; }
+}
+
+/* Bildgalerie Seitlich (Parallax): Bild auf einer Seite, Illustration gegenüber */
+.galerie-seitlich .container {
+  display: grid; gap: clamp(2rem, 5vw, 5rem); align-items: center; grid-template-columns: 1fr;
+}
+.galerie-seitlich__img { --ar: 16 / 10; will-change: transform; }
+.galerie-seitlich__illu { display: grid; place-items: center; will-change: transform; }
+.galerie-seitlich__illu img { width: min(100%, 380px); height: auto; }
+@media (min-width: 760px) {
+  .galerie-seitlich--illu-right .container { grid-template-columns: 1.5fr 1fr; }
+  .galerie-seitlich--illu-left .container { grid-template-columns: 1fr 1.5fr; }
+  .galerie-seitlich--illu-left .galerie-seitlich__img { order: 2; }
+  .galerie-seitlich--illu-left .galerie-seitlich__illu { order: 1; }
+}
+
+/* ============== 7.5) RESPONSIVE / MOBILE-FIXES =================== */
+/* Zentrierte Textblöcke dürfen nie breiter als ihr Container werden */
+.stack-center > *, .subhead > *, .stoerer > *, .header > * { max-width: 100%; }
+.section-title, .big-statement, .usp__title, .kontakt__title,
+.stoerer h2, .subhead__title, .phase__pille { max-width: 100%; }
+
+/* Tablet & kleiner */
+@media (max-width: 760px) {
+  .text-stoerer__row { flex-wrap: wrap; justify-content: center; text-align: center; }
+  .text-stoerer__row--a .text-stoerer__big { text-align: center; }
+  .text-stoerer__illu { width: clamp(120px, 38vw, 220px); }
+  .proj-card { flex-basis: 80%; }
+  .footer__cols { grid-template-columns: 1fr 1fr; }
+}
+
+/* Mobile: kompakte Nav-Pille, CTA wird zum Icon, nichts läuft über */
+/* Header/Subhead clippen Überstand (z.B. großes Logo auf Mobile) */
+.header, .subhead { overflow-x: clip; }
+
+/* Mobile (Prio 2): Nav vorerst ausgeblendet — DESKTOP behält die Nav.
+   Logo/Titel/Headings werden begrenzt, damit nichts überläuft. */
+@media (max-width: 600px) {
+  .nav { display: none; }
+  .header { padding-top: clamp(3rem, 9vw, 5rem); }
+  .header__logo { width: min(64vw, 230px); }
+  .subhead { padding-top: clamp(3.5rem, 10vw, 6rem); }
+  .subhead__title { font-size: clamp(2.2rem, 13vw, 3.2rem); }
+  .page-top { padding-top: clamp(2.5rem, 8vw, 4rem); }
+  .section-title, .usp__title { font-size: clamp(1.3rem, 2.5vw + 1rem, 1.9rem); }
+  .big-statement, .text-stoerer__big { font-size: clamp(1.2rem, 3vw + .9rem, 1.8rem); }
+  .kontakt__title { font-size: clamp(1.8rem, 6vw + 1rem, 2.6rem); }
+  .section-title, .big-statement, .text-stoerer__big { text-wrap: pretty; overflow-wrap: break-word; }
+  .footer__cols { grid-template-columns: 1fr; gap: 1.25rem; }
+  .footer__links { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; }
+}
+
+/* ====================== 8) REDUCED MOTION ========================= */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
