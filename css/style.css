@@ -213,65 +213,6 @@ h1, h2, h3, h4 {
 
 /* ===================== 5) GLOBALE KOMPONENTEN ===================== */
 
-/* ---------- 5.1 Loader (Lade- & Cursor-Animation) ---------- */
-body.is-loading { overflow: hidden; }
-.loader {
-  position: fixed; inset: 0; z-index: 1000;
-  background: var(--schnee-weiss);
-  display: grid; place-items: center;
-}
-.loader[hidden] { display: none; }
-.loader.is-cursor { cursor: none; }
-.loader__logo {                       /* füllbares TREFF.-Logo (Maske) */
-  position: relative;
-  width: clamp(180px, 32vw, 420px);
-  aspect-ratio: 995 / 213;
-  will-change: transform;
-}
-.loader.is-cursor .loader__logo {     /* im Cursor-Modus klein, JS positioniert */
-  position: fixed; top: 0; left: 0;
-  width: clamp(64px, 7vw, 96px);
-  margin: 0;
-}
-.loader__shape {                      /* SVG-Buchstabenmaske (clippt den Fill) */
-  position: absolute; inset: 0;
-  background: var(--kieselstein);     /* leerer Tank = sichtbares Grau (#696969) auf Weiß */
-  -webkit-mask: url("../assets/illustrations/logo-treff-wordmark.svg") center / contain no-repeat;
-          mask: url("../assets/illustrations/logo-treff-wordmark.svg") center / contain no-repeat;
-  overflow: hidden;
-}
-/* Steigender Wasser-Tank. JS treibt yPercent 101 -> 0.
-   Doppelt so hoch wie das Logo: unter dem Wellenkamm sitzt immer ein voller
-   Körper, der Farbverlauf (grau -> schwarz) kommt aus der Wellen-SVG. */
-.loader__fill {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  width: 100%; height: 200%;
-  transform: translateY(101%);        /* startet leer (unter den Buchstaben) */
-  will-change: transform;
-  pointer-events: none;
-}
-/* Prozedurale Wasserlinie: um genau eine Sinus-Periode breiter gerendert
-   (150 statt 100), damit der x-Drift nahtlos loopt (kein sichtbarer Sprung). */
-.loader__wave { position: absolute; top: 0; left: 0; width: 150%; height: 100%; display: block; }
-.loader__wave path { will-change: transform; }
-
-/* Intro-Zustand: gesamte Chrome ab dem ersten Frame verstecken.
-   visibility (NICHT display:none), damit .header__logo seine Layout-Box
-   behält und JS die finale Flugziel-Position exakt messen kann. */
-body.is-intro .nav {
-  transform: translateX(-50%) translateY(160%);   /* = .nav.is-hidden */
-  opacity: 0; pointer-events: none;
-}
-body.is-intro .header > * { visibility: hidden; }
-
-/* Reduced-Motion / ?still=1: keine Welle, flaches schwarzes Logo.
-   JS springt zusätzlich direkt in den Endzustand. */
-@media (prefers-reduced-motion: reduce) {
-  .loader__fill { transform: translateY(0%); }
-  .loader__wave { display: none; }
-  .loader__shape { background: var(--carbon-schwarz); }
-}
-
 /* ---------- 5.2 Nav Bar (Liquid Glass, fixed) ---------- */
 .nav {
   position: fixed; z-index: 900;
@@ -279,7 +220,6 @@ body.is-intro .header > * { visibility: hidden; }
   transform: translateX(-50%);
   transition: transform var(--t-med) var(--ease-out), opacity var(--t-med);
 }
-.nav.is-hidden { transform: translateX(-50%) translateY(160%); opacity: 0; }
 .nav__inner {
   display: flex; align-items: center; gap: 8px;
   padding: 8px;
@@ -479,12 +419,20 @@ body.is-intro .header > * { visibility: hidden; }
   display: grid; place-items: center;
   padding: clamp(3rem, 7vw, 7rem) var(--gutter);
   text-align: center;
+  overflow-x: clip;              /* Sicherheitsnetz: nichts bricht seitlich aus */
 }
 .stoerer h2 {
   font-family: var(--font-display);
-  font-size: var(--fs-display);
+  /* Skaliert mit der Viewport-Breite (statt fixer Display-Größe): hält auch das breiteste
+     Chunko-Wort ("Planungsaufwand", ~10× Fontgröße breit) auf Mobile & kleinen Laptops im
+     Rahmen — der Text wird kleiner statt rechts abgeschnitten. 8vw bleibt an jeder Breite
+     unter der Wort-Umbruchgrenze; Silbentrennung fängt sehr schmale Screens sauber ab. */
+  font-size: clamp(1.5rem, 8vw, 11rem);
   line-height: .98; text-transform: uppercase; letter-spacing: -0.01em;
   text-wrap: balance;
+  max-width: 100%;
+  overflow-wrap: break-word;    /* letzte Rückfallebene, falls ein Wort doch zu breit ist */
+  hyphens: auto;                /* bevorzugt saubere Silbentrennung (lang="de") statt Buchstaben-Stapel */
 }
 .stoerer--gelb   { background: var(--schulbus-gelb); color: var(--carbon-schwarz); }
 .stoerer--lila   { background: var(--lila-traube);   color: var(--carbon-schwarz); }
