@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TREFF. — Jugendräume. Schnell. Günstig. Einfach.</title>
+  <meta name="description" content="TREFF. baut standardisierte Container-Jugendtreffs: schnell, günstig und einfach. Zwei Modelle, ein durchdachtes System." />
+
+  <!-- Fonts vorab laden (meistgenutzte WOFF2) -->
+  <link rel="preload" href="fonts/Chunko Bold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/InterTight-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="css/style.css" />
+  <base href="/" />
+</head>
+
+<body class="is-loading">
+
+  <!-- ================= LOADER (Lade- & Cursor-Animation) ================= -->
+  <div class="loader" data-loader aria-hidden="true">
+    <div class="loader__logo">
+      <span class="loader__shape"><span class="loader__fill"></span></span>
+    </div>
+  </div>
+
+  <!-- ============================ NAV BAR ============================ -->
+  <nav class="nav" data-nav aria-label="Hauptnavigation">
+    <div class="nav__inner">
+      <a class="nav__pill nav__pill--home js-bounce" href="index.html" aria-label="Startseite">
+        <svg viewBox="0 0 16.9007 15.4006" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.94715 6.20158L8.45036 1.69885L12.9536 6.20158H12.9503V13.7008H3.9503V6.20158H3.94715ZM2.4503 7.69828L1.34276 8.80571L0.282857 7.74592L7.3906 0.638922C7.97589 0.0536928 8.92483 0.0536928 9.51012 0.638922L16.6179 7.74592L15.558 8.80571L14.4503 7.69817V13.7008C14.4503 14.5291 13.7787 15.2006 12.9503 15.2006H3.9503C3.12188 15.2006 2.4503 14.5291 2.4503 13.7008V7.69828Z" fill="currentColor"/></svg>
+      </a>
+      <a class="nav__pill nav__pill--text js-bounce" href="index.html#projekte">Projekte</a>
+      <a class="nav__pill nav__pill--text js-bounce" href="index.html#konzept">Konzept</a>
+      <a class="nav__pill nav__pill--text js-bounce" href="index.html#modelle">Modelle</a>
+      <a class="nav__pill nav__pill--cta js-bounce" href="kontakt.html">
+        Projekt anfragen
+        <svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ============================= HEADER ============================= -->
+  <header class="header">
+    <div class="header__logo">
+      <img src="assets/illustrations/logo-treff-wordmark.svg" alt="TREFF." />
+    </div>
+    <!-- SLOT: landing-hero -->
+    <figure class="img-slot header__hero">
+      <img src="assets/images/landing-hero.jpg" alt="TREFF. Jugendtreff aus Containern" width="1856" height="1044" />
+    </figure>
+  </header>
+
+  <main>
+
+    <!-- ===================== PROJEKTE ÜBERSICHT ===================== -->
+    <section class="section" id="projekte" data-parallax-scope>
+      <div class="container stack-center">
+        <p class="eyebrow" data-reveal>Projekte</p>
+        <h2 class="section-title" data-reveal>Unsere realisierten Projekte schaffen Jugendräume, die Jugendlichen Freude machen und im Alltag einen echten Unterschied bringen.</h2>
+      </div>
+
+      <!-- Karussell (Swipe/Drag) -->
+      <div class="carousel" data-carousel>
+        <div class="carousel__track" data-carousel-track>
+          <!-- SLOT: projekt-uebersicht-01..09 -->
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-01.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-02.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-03.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-04.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-05.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-06.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-07.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-08.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <article class="proj-card">
+            <figure class="img-slot proj-card__img" style="--ar: 584/617"><img src="assets/images/projekt-uebersicht-09.jpg" alt="Projekt Schwäbisch Gmünd" width="800" height="600" /></figure>
+            <div class="proj-card__bar">
+              <div class="proj-card__meta">
+                <span class="proj-card__title">Schwäbisch Gmünd</span>
+                <span class="proj-card__sub">Modell S &nbsp;&nbsp; 2023</span>
+              </div>
+              <a class="cta" href="projekte.html" aria-label="Zum Projekt Schwäbisch Gmünd">
+                <span class="cta__pill">Zum Projekt</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+        </div>
+        <div class="carousel__dots" data-carousel-dots aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- ===================== STÖRER (lila) ===================== -->
+    <section class="stoerer stoerer--lila full-bleed">
+      <h2 data-reveal="scale">Schluss mit teuren Einzelplanungen: Jugendräume neu gedacht.</h2>
+    </section>
+
+    <!-- ===================== USP ===================== -->
+    <section class="section usp" data-parallax-scope>
+      <div class="container">
+        <div class="usp__head" data-reveal>
+          <p class="eyebrow">Alleinstellungsmerkmal</p>
+          <h2 class="usp__title">Zentrale Vorteile des Konzepts.</h2>
+        </div>
+      </div>
+      <div class="container">
+        <div class="card-grid usp__grid" data-reveal>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-1.svg" alt="" /><p>Kostengünstiger<br>als ein Neubau</p></article>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-2.svg" alt="" /><p>Kurze Planungs-<br>&amp; Montage Zeit</p></article>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-3.svg" alt="" /><p>Für Kleinstädte,<br>Vororte &amp; Dörfer</p></article>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-4.svg" alt="" /><p>Durchdachte<br>Raumaufteilung</p></article>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-5.svg" alt="" /><p>Zwei verschiedene<br>Größen</p></article>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-6.svg" alt="" /><p>Standardisiertes<br>Containersystem</p></article>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-7.svg" alt="" /><p>Jugendliche &amp;<br>moderne Optik</p></article>
+          <article class="card-pill usp-card"><img class="usp-card__icon" src="assets/illustrations/usp-icon-8.svg" alt="" /><p>Legale Graffitiwand<br>zum Sprayen</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TEXT STÖRER 2 ===================== -->
+    <section class="section text-stoerer" data-parallax-scope>
+      <div class="container">
+        <div class="text-stoerer__row text-stoerer__row--a">
+          <img class="deco text-stoerer__illu" src="assets/illustrations/illu-text-1.svg" alt="" data-float data-parallax="0.3" />
+          <p class="text-stoerer__big" data-reveal="right">Ein System, das mitdenkt: Je nach Raumsituation lässt sich die passende Größe wählen, ohne auf eine klare Gestaltung und gute Nutzung zu verzichten.</p>
+        </div>
+        <div class="text-stoerer__row text-stoerer__row--b">
+          <p class="text-stoerer__big" data-reveal="left">Ein Jugendtreff, der nicht bei null anfangen muss.</p>
+          <img class="deco text-stoerer__illu" src="assets/illustrations/illu-frau.svg" alt="" data-float data-parallax="0.3" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== KONZEPT ===================== -->
+    <section class="section konzept" id="konzept">
+      <div class="container stack-center">
+        <p class="eyebrow" data-reveal>Konzept</p>
+        <h2 class="section-title" data-reveal>Drei Säulen bilden das Fundament unserer Jugendtreffs.</h2>
+      </div>
+      <div class="container">
+        <div class="konzept__grid">
+          <article class="konzept-pille" data-reveal="up">
+            <p class="eyebrow eyebrow--gelb">Sozial</p>
+            <ul class="tag-list">
+              <li>offen &amp; niedrigschwellig</li><li>ohne Konsumzwang</li><li>Treffpunkt im Alltag</li>
+              <li>Begegnung &amp; Gemeinschaft</li><li>Rückzug &amp; Gespräche</li><li>Begleitung durch Fachkräfte</li>
+            </ul>
+          </article>
+          <article class="konzept-pille" data-reveal="up">
+            <p class="eyebrow eyebrow--gruen">Partizipation</p>
+            <ul class="tag-list">
+              <li>Mitgestaltung</li><li>Selbstaneignung</li><li>gemeinsames Bauen</li>
+              <li>Identifikation mit dem Ort</li><li>Lernen durch Praxis</li><li>Aufklärung statt Verbote</li>
+            </ul>
+          </article>
+          <article class="konzept-pille" data-reveal="up">
+            <p class="eyebrow eyebrow--lila">Architektur</p>
+            <ul class="tag-list">
+              <li>innovatives Containersystem</li><li>klare Zonierung</li><li>aktive &amp; ruhige Bereiche</li>
+              <li>flexible Nutzung</li><li>robuste Alltagsarchitektur</li><li>Innen- und Außenbereiche</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TEXT FRAME (Tagesablauf) ===================== -->
+    <section class="section text-frame">
+      <div class="container stack-center">
+        <p class="eyebrow" data-reveal>Tagesablauf</p>
+        <p class="big-statement" data-reveal>Im Jugendtreff startet der Tag mit Vorbereitung und dem Öffnen des Raums. Nachmittags kommen Jugendliche zusammen, treffen Freund*innen, spielen, reden oder nutzen Rückzugsorte. Gegen Abend wird es ruhiger und der Tag klingt gemeinsam aus.</p>
+      </div>
+    </section>
+
+    <!-- ===================== VIDEO TAGESABLAUF ===================== -->
+    <section class="section video-sec">
+      <div class="container">
+        <!-- SLOT: video tagesablauf (Poster: assets/images/video-tagesablauf-poster.jpg) -->
+        <figure class="img-slot video-slot" style="--ar: 16/9" data-reveal>
+          <video controls playsinline preload="none" poster="assets/images/video-tagesablauf-poster.jpg">
+            <source src="assets/videos/tagesablauf.mp4" type="video/mp4" />
+          </video>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== SÄULEN TEXT (Aufbau) ===================== -->
+    <section class="section saeulen" data-parallax-scope>
+      <div class="container">
+        <img class="deco saeulen__illu" src="assets/illustrations/illu-rennender-junge.svg" alt="" data-parallax="0.35" data-float />
+        <div class="saeulen__text">
+          <p class="eyebrow" data-reveal>Aufbau</p>
+          <p class="big-statement" data-reveal>Mit unserem Containersystem ist der Weg zum neuen Jugendtreff klar strukturiert und nachvollziehbar aufgebaut. Der Ablauf wird in sechs Phasen erklärt und zeigt, wie aus einer Entscheidung ein vollständig umgesetzter, standortgerechter Jugendtreff entsteht.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PHASEN (Scrollytelling) ===================== -->
+    <section class="section phasen" data-phasen>
+      <div class="container">
+        <div class="phasen__wrap" data-phasen-wrap>
+          <!-- SVG-Verbindungslinie wird per JS (phasen.js) erzeugt -->
+          <svg class="phasen__lines" data-phasen-lines aria-hidden="true" preserveAspectRatio="none"></svg>
+
+          <div class="phase phase--right" data-phase>
+            <span class="phase__num">Phase — 1</span>
+            <div class="phase__pille">
+              <h3 class="phase__title">Entscheidung treffen</h3>
+              <p class="phase__desc">Sie entscheiden sich für unser Containersystem als standardisierte Lösung für einen neuen Jugendtreff.</p>
+            </div>
+          </div>
+          <div class="phase phase--left" data-phase>
+            <span class="phase__num">Phase — 2</span>
+            <div class="phase__pille">
+              <h3 class="phase__title">Modell auswählen</h3>
+              <p class="phase__desc">Im nächsten Schritt wird das passende Modell gewählt. Zur Verfügung stehen das kleine Modell 4C für bis zu 20 Jugendliche und das große Modell 7C für bis zu 50 Jugendliche.</p>
+            </div>
+          </div>
+          <div class="phase phase--right" data-phase>
+            <span class="phase__num">Phase — 3</span>
+            <div class="phase__pille">
+              <h3 class="phase__title">Standort prüfen</h3>
+              <p class="phase__desc">Anschließend wird der vorgesehene Standort auf seine Eignung geprüft. Entscheidend sind dabei unter anderem Platzverhältnisse, Erschließung, Zugänglichkeit und die grundsätzliche bauliche Umsetzbarkeit vor Ort.</p>
+            </div>
+          </div>
+          <div class="phase phase--left" data-phase>
+            <span class="phase__num">Phase — 4</span>
+            <div class="phase__pille">
+              <h3 class="phase__title">Einrichtung konkretisieren</h3>
+              <p class="phase__desc">Die bauliche und funktionale Grundstruktur ist bereits festgelegt, offen bleibt nur die konkrete Möblierung einzelner Bereiche. Hier wird abgestimmt, welche zusätzlichen Elemente vor Ort benötigt werden.</p>
+            </div>
+          </div>
+          <div class="phase phase--right" data-phase>
+            <span class="phase__num">Phase — 5</span>
+            <div class="phase__pille">
+              <h3 class="phase__title">Umsetzung vorbereiten</h3>
+              <p class="phase__desc">Sobald alle relevanten Entscheidungen getroffen sind, wird die Umsetzung vorbereitet. Dazu gehören die finale Koordination, die terminliche Einplanung und die Abstimmung aller notwendigen Schritte bis zur Realisierung am Standort.</p>
+            </div>
+          </div>
+          <div class="phase phase--left" data-phase>
+            <span class="phase__num">Phase — 6</span>
+            <div class="phase__pille">
+              <h3 class="phase__title">Aufbau realisieren</h3>
+              <p class="phase__desc">Im letzten Schritt wird der Jugendtreff vor Ort aufgebaut und einsatzbereit gemacht. Ihr Containersystem erhält die finale farbliche Ausführung und unseren illustrativen Stil, sodass der Ort sichtbar, verständlich und jugendgerecht im Stadtbild erscheint. Damit entsteht ein sofort nutzbarer Jugendtreff, der standardisiert geplant, effizient umgesetzt und auf den jeweiligen Standort abgestimmt ist.</p>
+            </div>
+          </div>
+
+          <div class="phasen__end" data-phase-end>
+            <div class="container-badge" aria-label="TREFF. Container">
+              <img src="assets/illustrations/logo-treff-wordmark.svg" alt="TREFF." />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STÖRER (grün) ===================== -->
+    <section class="stoerer stoerer--gruen full-bleed">
+      <h2 data-reveal="scale">Jugendräume. Schnell. Günstig. Einfach.</h2>
+    </section>
+
+    <!-- ===================== VIDEO TAGESABLAUF (2) ===================== -->
+    <section class="section video-sec">
+      <div class="container">
+        <!-- SLOT: video tagesablauf 2 -->
+        <figure class="img-slot video-slot" style="--ar: 16/9" data-reveal>
+          <video controls playsinline preload="none" poster="assets/images/video-tagesablauf-2-poster.jpg">
+            <source src="assets/videos/tagesablauf-2.mp4" type="video/mp4" />
+          </video>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== MODELLE ===================== -->
+    <section class="section modelle" id="modelle" data-parallax-scope>
+      <div class="container stack-center">
+        <p class="eyebrow" data-reveal>Modelle</p>
+        <h2 class="section-title" data-reveal>Zwei Größen, ein System: 4C für kleinere Flächen, 7C für mehr Raum und mehr Nutzung.</h2>
+      </div>
+      <div class="container">
+        <div class="modelle__grid">
+          <!-- CTA 4C -> modell-4c.html -->
+          <article class="modell-card" data-reveal="up">
+            <figure class="img-slot modell-card__img" style="--ar: 1/1"><img src="assets/images/modell-4c-cover.jpg" alt="Modell 4C" width="800" height="800" /></figure>
+            <div class="modell-card__bar">
+              <div class="modell-card__meta">
+                <span class="modell-card__title">Modell 4C</span>
+                <span class="modell-card__sub">bis zu 20 Jugendliche &nbsp;&nbsp;&nbsp; 4 Container</span>
+              </div>
+              <a class="cta" href="modell-4c.html" aria-label="Modell 4C – Mehr anzeigen">
+                <span class="cta__pill">Mehr Anzeigen</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+          <!-- CTA 7C -> modell-7c.html -->
+          <article class="modell-card" data-reveal="up">
+            <figure class="img-slot modell-card__img" style="--ar: 1/1"><img src="assets/images/modell-7c-cover.jpg" alt="Modell 7C" width="800" height="800" /></figure>
+            <div class="modell-card__bar">
+              <div class="modell-card__meta">
+                <span class="modell-card__title">Modell 7C</span>
+                <span class="modell-card__sub">bis zu 50 Jugendliche &nbsp;&nbsp;&nbsp; 7 Container</span>
+              </div>
+              <a class="cta" href="modell-7c.html" aria-label="Modell 7C – Mehr anzeigen">
+                <span class="cta__pill">Mehr Anzeigen</span>
+                <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FAQ ===================== -->
+    <section class="section faq">
+      <div class="container faq__layout">
+        <p class="eyebrow" data-reveal>FAQ</p>
+        <div class="faq__list" data-faq>
+          <details class="faq-item">
+            <summary>Für welche Standorte ist TREFF. geeignet?<span class="faq-item__icon" aria-hidden="true"></span></summary>
+            <div class="faq-item__body"><div class="faq-item__inner"><p>TREFF. eignet sich besonders für Kleinstädte, Vororte und Dörfer – überall dort, wo Platz für einen kompakten, standardisierten Jugendtreff vorhanden ist.</p></div></div>
+          </details>
+          <details class="faq-item">
+            <summary>Was kann individuell angepasst werden?<span class="faq-item__icon" aria-hidden="true"></span></summary>
+            <div class="faq-item__body"><div class="faq-item__inner"><p>Die bauliche Grundstruktur ist festgelegt – anpassbar sind die Möblierung einzelner Bereiche sowie die finale farbliche Ausführung und der illustrative Stil.</p></div></div>
+          </details>
+          <details class="faq-item">
+            <summary>Ist unser Jugendtreff für unterschiedliche Standorte geeignet?<span class="faq-item__icon" aria-hidden="true"></span></summary>
+            <div class="faq-item__body"><div class="faq-item__inner"><p>Ja. Das System ist standardisiert und lässt sich auf die jeweiligen Platzverhältnisse und die Erschließung vor Ort abstimmen.</p></div></div>
+          </details>
+          <details class="faq-item">
+            <summary>Muss die Stadt die Raumaufteilung selbst planen?<span class="faq-item__icon" aria-hidden="true"></span></summary>
+            <div class="faq-item__body"><div class="faq-item__inner"><p>Nein. Die Raumaufteilung ist bereits durchdacht Teil des Systems – die Stadt entscheidet lediglich über Modellgröße, Standort und einzelne Ausstattungselemente.</p></div></div>
+          </details>
+          <details class="faq-item">
+            <summary>Gibt es auch nachhaltige Zusatzoptionen?<span class="faq-item__icon" aria-hidden="true"></span></summary>
+            <div class="faq-item__body"><div class="faq-item__inner"><p>Ja. Für beide Modelle ist eine Photovoltaikanlage als optionale Ergänzung vorgesehen. Damit kann unser System je nach Standort, Budget und Zielsetzung technisch erweitert werden.</p></div></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== KONTAKT ===================== -->
+    <section class="section kontakt" id="kontakt" data-parallax-scope>
+      <div class="container kontakt__grid">
+        <div class="kontakt__head" data-reveal="right">
+          <p class="eyebrow">Kontakt</p>
+          <h2 class="kontakt__title">Lass uns deinen TREFF. bauen.</h2>
+        </div>
+        <form class="form-card" data-reveal="left" onsubmit="return false">
+          <div class="dropdown" data-dropdown>
+            <button type="button" class="field dropdown__toggle" aria-haspopup="listbox" aria-expanded="false">
+              <span class="dropdown__value is-placeholder" data-dropdown-value>Modell</span>
+              <span class="field__chevron" aria-hidden="true">›</span>
+            </button>
+            <ul class="dropdown__menu" role="listbox" tabindex="-1">
+              <li class="dropdown__option" role="option" data-value="Modell 4C">Modell 4C</li>
+              <li class="dropdown__option" role="option" data-value="Modell 7C">Modell 7C</li>
+              <li class="dropdown__option" role="option" data-value="Unentschlossen">Unentschlossen</li>
+              <li class="dropdown__option" role="option" data-value="Unabhängige Frage">Unabhängige Frage</li>
+            </ul>
+          </div>
+          <label class="field"><input type="text" placeholder="Carsten Container" aria-label="Name" /></label>
+          <label class="field"><input type="email" placeholder="carsten@container.de" aria-label="E-Mail" /></label>
+          <div class="form-row">
+            <div class="dropdown dropdown--code" data-dropdown>
+              <button type="button" class="field field--code dropdown__toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Ländervorwahl">
+                <span class="dropdown__value" data-dropdown-value>🇩🇪 +49</span>
+                <span class="field__chevron" aria-hidden="true">›</span>
+              </button>
+              <ul class="dropdown__menu" role="listbox" tabindex="-1" data-lenis-prevent>
+                <li class="dropdown__option" role="option" data-value="🇩🇪 +49" aria-selected="true"><span class="code__flag">🇩🇪</span><span class="code__dial">+49</span><span class="code__name">Deutschland</span></li>
+                <li class="dropdown__option" role="option" data-value="🇦🇹 +43"><span class="code__flag">🇦🇹</span><span class="code__dial">+43</span><span class="code__name">Österreich</span></li>
+                <li class="dropdown__option" role="option" data-value="🇧🇪 +32"><span class="code__flag">🇧🇪</span><span class="code__dial">+32</span><span class="code__name">Belgien</span></li>
+                <li class="dropdown__option" role="option" data-value="🇫🇷 +33"><span class="code__flag">🇫🇷</span><span class="code__dial">+33</span><span class="code__name">Frankreich</span></li>
+                <li class="dropdown__option" role="option" data-value="🇮🇹 +39"><span class="code__flag">🇮🇹</span><span class="code__dial">+39</span><span class="code__name">Italien</span></li>
+                <li class="dropdown__option" role="option" data-value="🇳🇱 +31"><span class="code__flag">🇳🇱</span><span class="code__dial">+31</span><span class="code__name">Niederlande</span></li>
+                <li class="dropdown__option" role="option" data-value="🇵🇱 +48"><span class="code__flag">🇵🇱</span><span class="code__dial">+48</span><span class="code__name">Polen</span></li>
+                <li class="dropdown__option" role="option" data-value="🇵🇹 +351"><span class="code__flag">🇵🇹</span><span class="code__dial">+351</span><span class="code__name">Portugal</span></li>
+                <li class="dropdown__option" role="option" data-value="🇪🇸 +34"><span class="code__flag">🇪🇸</span><span class="code__dial">+34</span><span class="code__name">Spanien</span></li>
+                <li class="dropdown__option" role="option" data-value="🇸🇪 +46"><span class="code__flag">🇸🇪</span><span class="code__dial">+46</span><span class="code__name">Schweden</span></li>
+              </ul>
+            </div>
+            <label class="field"><input type="tel" placeholder="[123] 456-7890" aria-label="Telefon" /></label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="cta">
+              <span class="cta__pill">Weiter</span>
+              <span class="cta__circle"><svg viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M1 1H10C11.1046 1 12 1.89543 12 3V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 2L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================= FOOTER ============================= -->
+  <footer class="footer">
+    <div class="footer__grid">
+      <div class="footer__logo" data-reveal>
+        <img src="assets/illustrations/footer-logo.svg" alt="TREFF." width="432" height="257" />
+      </div>
+      <div class="footer__cols">
+        <address>
+          Goethestraße 5<br />
+          73525 Schwäbisch Gmünd<br />
+          Germany<br /><br />
+          +49 17 36 19 76 08
+        </address>
+        <ul class="footer__links">
+          <li><a href="#">Newsletter</a></li>
+          <li><a href="#">Jobs</a></li>
+          <li><a href="#">Datenschutz</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+        <ul class="footer__links">
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">TikTok</a></li>
+          <li><a href="#">YouTube</a></li>
+          <li><a href="#">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================= SCRIPTS ============================= -->
+  <script src="js/lib/gsap.min.js"></script>
+  <script src="js/lib/ScrollTrigger.min.js"></script>
+  <script src="js/lib/Draggable.min.js"></script>
+  <script src="js/lib/lenis.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/parallax.js"></script>
+  <script src="js/phasen.js"></script>
+  <script src="js/carousel.js"></script>
+  <script src="js/faq.js"></script>
+  <script src="js/loader.js"></script>
+</body>
+</html>

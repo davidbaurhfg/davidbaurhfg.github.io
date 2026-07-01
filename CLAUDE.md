@@ -1,0 +1,205 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# TREFF. — Website (Bachelor-Projekt)
+
+Statische, animationsreiche Website für **TREFF.** (Container-Jugendräume, Claim „Jugendräume. Schnell. Günstig. Einfach.") — umgesetzt aus Figma. Reines **HTML/CSS/JS, kein Build-Schritt, keine Dependencies außer lokalen Libs**.
+
+## Vorschau / starten
+
+```bash
+# Empfohlen: direkt in Chrome öffnen (alle Libs/Fonts lokal)
+open index.html
+
+# Alternativ: lokaler Server (für Fonts/CORS-Sonderfälle)
+python3 -m http.server 8000        # http://localhost:8000
+python3 serve.py                   # Port 8754 (Default; respektiert sonst $PORT)
+
+# Animationen deaktivieren (Reduced-Motion-Test):
+# ?still=1 an URL anhängen
+
+# Loader-Animation neu abspielen (läuft sonst 1×/Session):
+# sessionStorage.clear() in der Browser-Konsole, dann Reload
+```
+
+Der Ordner liegt **lokal** (`~/CLAUDE/9_VIBE`, nicht mehr im Google Drive). `serve.py` liefert sein eigenes Verzeichnis aus (`os.path.dirname(__file__)`) — robust gegen Verschieben — und liest den Port aus `$PORT` (Default 8754).
+
+**Claude-Code-Preview:** `.claude/launch.json` definiert den Server `"treff"` (→ `serve.py`) mit `"autoPort": true`. Damit weicht `preview_start` auf einen freien Port aus, falls 8754 belegt ist (z.B. durch einen parallelen Chat). Den `serverId`/`port` aus der `preview_start`-Antwort verwenden.
+
+## Seiten
+
+| Datei | Inhalt | Erreichbar über |
+|---|---|---|
+| `index.html` | Landingpage (14 Content-`<section>` + Header/Footer) | — |
+| `modell-4c.html` | Modell 4C (klein) | Modelle-Karte „Mehr Anzeigen" |
+| `modell-7c.html` | Modell 7C (groß) | Modelle-Karte „Mehr Anzeigen" |
+| `projekte.html` | Projekte Schwäbisch Gmünd | Karussell „Zum Projekt" |
+| `kontakt.html` | Projekt anfragen | Nav-Button „Projekt anfragen" |
+
+## Designsystem (`css/style.css :root`)
+
+Farben: `--lila-traube #9696FF`, `--wilde-malve #E5B3FF`, `--flammen-orange #FF4C02`, `--schulbus-gelb #FFC800`, `--helle-fichte #00812B`, `--dunkle-fichte #004F1A`, `--kieselstein #696969`, `--carbon-schwarz #1A1A1A`, `--schnee-weiss #FFFFFF`, `--graue-strasse #E5E6E6`.
+
+Schriften: **Chunko Bold** (Headlines, Logo), **Inter Tight Regular/Medium** (Body, UI). Hintergrund immer `--schnee-weiss`.
+
+Spacing: 4/8-Raster (`--space-1` … `--space-10`). Type-Scale fluid (`clamp()`). Radien: `--r-pill: 9999px`, `--r-lg: 28px`, `--r-md: 18px`.
+
+## JavaScript-Architektur
+
+### Ladereihenfolge (identisch in allen 5 HTML-Dateien, am Ende von `<body>`)
+```
+js/lib/gsap.min.js → ScrollTrigger → Draggable → js/lib/lenis.min.js → app.js → parallax.js → phasen.js → carousel.js → faq.js → loader.js
+```
+Alle Libs liegen in `js/lib/` (lokal, kein CDN). `loader.js` steht im Markup **zuletzt**, seine IIFE läuft aber trotzdem **sofort beim Parsen** (synchrones Script, vor `DOMContentLoaded`) — sie braucht nur das bereits im HTML liegende Overlay, kein gebootetes `app.js`. `app.js` hängt sein `boot()` an `DOMContentLoaded` (bzw. ruft sofort, falls DOM schon geladen). Die Feature-Module (`parallax/phasen/carousel/faq`) registrieren beim Parsen nur ihre `TREFF.init*`-Funktionen; aufgerufen werden sie zentral aus `boot()`.
+
+### `js/app.js` — Motion-Core
+`boot()` ruft in dieser Reihenfolge auf (Quelle der Wahrheit, nicht die Definitionsreihenfolge im File):
+`initImageSlots()` → `initDropdown()` → `initSmoothScroll()` (Lenis ↔ GSAP-Ticker) → `initAnchorScroll()` → `initNav()` → **nur `hasGSAP && !REDUCED`:** `initReveals()` + `initParallax()` → **nur `hasGSAP`:** `initFloating()` + `initBounce()` → Feature-Module in fester Reihenfolge `["initPhasen","initParallaxExtra","initCarousel","initFAQ"]` (jeweils nur falls als `TREFF.*` registriert, `try/catch`-umschlossen) → `ScrollTrigger.refresh()`.
+
+**`initReveals()`**: Setzt `autoAlpha:0` auf alle `[data-reveal]`-Elemente beim Start. Elemente ohne `data-reveal`-Attribut werden **nie** ausgeblendet — wichtig bei der Loader-Sequenz. Header-Logo (`.header__logo`) und Header-Hero (`.header__hero`) haben **kein** `data-reveal`, damit der Loader sie kontrollieren kann.
+
+**`initBounce()`**: Alle `.js-bounce`-Elemente skalieren auf hover auf `1.06` (GSAP), außer `.nav__pill--cta` → `1.03` (explizite Ausnahme in app.js).
+
+**`initNav()`**: Nur `is-scrolled`-Klasse per Scroll-Position, **kein** Auto-Hide beim Runterscrollen.
+
+### `js/loader.js` — 4-Phasen State Machine (1×/Session)
+
+```
+Phase 1: intro-hidden-ui      Weißer Screen, gesamte UI versteckt (body.is-intro)
+Phase 2: logo-loading-follow  Logo füllt sich grau→schwarz (Wasserlinie) + folgt Maus
+Phase 3: logo-transition      Logo fliegt von Cursor-Position in Header (Single-Node-Morph)
+Phase 4: header-active        Cursor zurück, UI eingeblendet, Nav gleitet von unten rein
+```
+
+**Kritische Invarianten:**
+- `body.is-intro .header > *` → `visibility: hidden` (NICHT `display:none` — Layout-Box muss für `getBoundingClientRect()` erhalten bleiben)
+- `headerImg.style.visibility = "visible"` + `loader.hidden = true` im selben JS-Tick (atomarer Tausch, kein 1-Frame-Loch)
+- `gsap.killTweensOf(logo)` vor dem Flug (beendet quickTo-Cursor-Tweens)
+- `neutralizeHeaderReveal()` löscht `data-reveal` vom Header-Logo und killt zugehörige ScrollTrigger, bevor `initReveals()` laufen kann
+- Nav-Einblendung via CSS-Klasse (`is-hidden` toggle + double-rAF), **kein GSAP-Transform** auf der Nav (würde `translateX(-50%)` brechen)
+- Guards: `SEEN || !hasGSAP || REDUCED` → direkt in Phase 4
+
+**Wasserlinien-SVG** (`buildWave`): 64-Segment-Sinuspfad, `PERIOD=50`, `W=150` (100 + eine Periode extra → `xPercent:-33.333%` Loop ist phasen-kontinuierlich, kein sichtbarer Sprung). LinearGradient: `--kieselstein` (grau, Kamm) → `--carbon-schwarz` (schwarz, Körper). Dauer: 6s Desktop / 5.2s Touch.
+
+### `js/phasen.js` — Scrollytelling
+SVG-Linie mit 2×90°-Knicken, aktive/abgedimmte Phase per ScrollTrigger. Markup-Hook: `data-phasen`.
+
+### `js/parallax.js`
+Eigenständiges Modul. Hook: `data-illu-parallax`.
+
+### `js/faq.js` — Akkordeon (native `<details>` + GSAP)
+Hook: `data-faq`. Nur ein Eintrag gleichzeitig offen; `summary`-Klick `preventDefault` + manuelles Toggle. Höhe **und** Eck-Radius morphen GSAP-synchron (`fromTo height 0↔scrollHeight` + `borderRadius` halbe-Höhe↔40px), Inhalt blendet per `autoAlpha`+`y` ein. Reduced-Motion/kein-GSAP → sofort auf/zu.
+
+**Kritische Zustands-Trennung** (sonst keine Zuklapp-Animation):
+- **`.is-open`** (Klasse) = **visueller** Zustand → BG, Icon-Rotation (`::before/::after`), Radius-Ziel. Wird beim Öffnen UND Schließen **sofort** umgeschaltet → BG/Icon morphen weich per CSS-Transition (`.5s var(--ease-out)`).
+- **`[open]`** (Attribut) = hält den Body im DOM sichtbar. Öffnen: sofort setzen. Schließen: **erst im `onComplete`** entfernen — sonst blendet `<details>` den Body sofort aus und die Zuklapp-Animation fällt weg.
+- CSS: `.faq-item` eingeklappt `border-radius: var(--r-pill)` (volle Pille), `.faq-item.is-open` → `40px`. Der Radius wird **per GSAP** getrieben (nicht CSS-Transition), weil `--r-pill` sonst auf die halbe Höhe clampt und beim Höhenwechsel „aufpoppt".
+- **Padding-Floor-Falle (Ursache des „hakelnden" Schließens):** Der höhen-animierte `.faq-item__body` hat **kein** Padding. `box-sizing: border-box` lässt die Höhe sonst **nicht unter `padding-bottom`** schrumpfen → die Schließ-Animation friert bei ~`padding-bottom` ein und springt am Ende per `display:none` hart auf 0 (beim Öffnen durch den Fade kaschiert). Deshalb sitzt das Padding auf **`.faq-item__inner`**, der Body hat nur `overflow:hidden` und kann sauber auf echte `0` animieren. **Nie wieder Padding/Border auf ein höhen-animiertes Element legen.**
+
+### `js/carousel.js` — Projekte-Slider
+Läuft für **alle** `[data-carousel]` (Hooks: `data-carousel-track`, `data-carousel-dots`). Aktuell nur der **Projekte-Slider** (`.carousel__track` auf `index.html`): Maus-Drag + Klick-Unterdrückung nach echtem Drag, Smooth-Scroll-Engine + Cluster-Indicators. Volle Details unter [Karussell / Slider](#karussell--slider). **Die USP-Vorteile sind kein Slider mehr** — sie nutzen die statische `.card-grid`/`.card-pill`-Komponente (siehe [Karten-Raster (USP + Specs)](#karten-raster-usp--specs)).
+
+### `window.TREFF` — globaler Namespace
+`app.js` schreibt vor DOMContentLoaded:
+- `TREFF.reduced` — `true` bei `prefers-reduced-motion` oder `?still=1`
+- `TREFF.isTouch` — `true` bei Touch/Coarse-Pointer
+- `TREFF.lenis` — Lenis-Instanz (nach Init)
+- `TREFF.initPhasen` / `TREFF.initParallaxExtra` / `TREFF.initCarousel` / `TREFF.initFAQ` — von den jeweiligen Modulen registriert (exakte Namen, `FAQ` groß!), von `boot()` in genau dieser Reihenfolge aufgerufen
+
+Alle Feature-Module greifen über `window.TREFF` auf diese Werte zu — kein direktes globales `gsap`/`lenis` außerhalb der Libs selbst.
+
+## Wichtige CSS-Komponenten
+
+### Nav (`.nav`)
+Fixed, **unten mittig** (`bottom: 24px; left: 50%; transform: translateX(-50%)`). Liquid-Glass-Pille. Hover-Farben: Home→Lila, Text→Dunkle-Fichte, CTA→Schulbus-Gelb.
+
+`body.is-intro .nav` und `.nav.is-hidden` halten die Nav versteckt (`translateX(-50%) translateY(160%)`). **Niemals GSAP auf die Nav-Transform anwenden** — würde die `translateX(-50%)`-Zentrierung zerstören.
+
+Desktop-only (≤600px ausgeblendet, Prio 2).
+
+### Generator-CTA (`.cta`)
+Pille + oranger Kreis, Pfeil **immer 8×8 px**. Werte exakt aus Figma (Frame 232×72 am Max):
+Pille Border **1px** `--carbon-schwarz`, Schrift **Inter Tight Regular (400)**, Padding 32/24 px,
+Radius `--r-pill`. Kreis 56 px, BG `--flammen-orange`. Custom-Props: `--cta-gap .5rem` (8px Lücke),
+`--cta-move 1rem` (16px Kreis-Shift im Hover), `--cta-inset: calc((var(--cta-h) - var(--cta-circle)) / 2)`
+(= 8px am Max; hält den weißen Ring **bei jeder Breite** konzentrisch um den Kreis).
+
+**Hover-Animation (kein Layout-Reflow, geschlossene Kontur in jedem Zustand):**
+- `.cta__pill` hat immer volle Merge-Breite (`padding-right: cta-pad + cta-grow`, statisch), selbst **transparent & rahmenlos** — nur Text-Träger.
+- Rahmen **+** weiße Füllung liegen auf **`.cta__pill::before`** (`position:absolute; inset 0; border 1px; border-radius --r-pill`). Die rechte Kante wird per **`right: var(--cta-grow)`** (unhovered) → **`right: 0`** (Hover) eingezogen/aufgezogen. Weil `::before` eine echte bordierte Box ist, ist die Outline im Unhovered-Mode eine **rundum geschlossene Pille** (kein abgeschnittener rechter Bogen).
+- `.cta__circle` hat `margin-left: cta-gap - cta-grow` (negativ, kompensiert Extra-Breite); Hover: `translateX(-cta-move)`.
+- Animiert werden nur `right` (auf der absolut positionierten `::before` → **kein** Reflow von Flex/Grid-Eltern) und `transform` (Kreis, GPU).
+- Timing: Kontur (`::before right`) flüssig (`.5s` in / `.45s` out, `--ease-out`, **kein** Overshoot); Kreis leicht bouncy (`.55s` `--ease-bounce` in, `.45s` `--ease-out` out → ruhiger Rückweg).
+
+**Historie:** Früher per `clip-path: inset(... round)` auf der bordierten Pille — das clippte den Rahmen an der Schnittkante hart weg (rechter Bogen „offen"). Ersetzt durch die `::before`-Right-Inset-Lösung.
+
+**Nie wieder `padding-right`/`margin-right` auf `.cta__pill` (in-flow) animieren** — das löst Layout-Reflow in Flex/Grid-Eltern aus (Karussell-Bar, Modell-Bar, Kontakt-Grid) und erzeugt vertikale Sprünge. Das `right` auf der **absoluten `::before`** ist davon nicht betroffen.
+
+### Karussell / Slider
+Betrifft **nur den Projekte-Slider** auf `index.html` (`.carousel` → `.carousel__track` mit 9 `.proj-card`). Die USP-Vorteile sind kein Slider mehr (statisches Grid, siehe [Karten-Raster (USP + Specs)](#karten-raster-usp--specs)).
+
+**Card-Maße:** `.proj-card { flex: 0 0 584px }`, Bild `figure.img-slot.proj-card__img` mit Inline `style="--ar: 584/617"` → Zielgröße **584×617**. (≤760px: `flex-basis: 80%`.)
+
+**Slider-Insets** (Override-Block `.carousel__track`, schlägt die geteilte `padding-inline: var(--gutter)`-Regel):
+`margin-left: 32px` (feste linke **Abschneidekante** — `overflow-x:auto` clippt Cards links davon) · `padding-left: 180px` (→ **212px** Startabstand der ersten Card) · `padding-right: 212px` (Endabstand) · `scroll-padding-left: 180px` (Snap-/Klick-Ziel = 212px). CSS-Default `scroll-snap-type: x proximity`.
+
+**Smooth-Scroll-Engine** (`carousel.js`, nur wenn `!TREFF.reduced && track.classList.contains("carousel__track")`):
+- Hält ein `target` und gleitet `scrollLeft` per **Frame-Lerp** (`EASE 0.135`) dorthin; setzt dabei `track.style.scrollSnapType = "none"` → **JS besitzt das Snapping** (kein CSS-Snap-Ruckeln).
+- Maus-Drag geglättet (`smooth.drag`), beim Loslassen **Momentum** aus der Zeiger-Geschwindigkeit (`MOMENTUM 240`, auf `±1.4·clientWidth` gedeckelt), danach sanftes **Snap** auf nächste Card-Position (Kandidaten inkl. `0` und `maxScroll` → Anfang/Ende sind gültige Ruhepunkte).
+- **Trackpad-Horizontal-Wheel** (`deltaX` dominant) geglättet; vertikales Wheel scrollt die Seite (kein Hijacking). Dot-Klick → `smooth.to(target, snap=true)`.
+- **Fallback:** Reduced-Motion und **Touch** (`pointerType !== "mouse"`) nutzen nativen Scroll + CSS-`proximity`-Snap (Engine wird nicht erzeugt). Tuning über `EASE`/`MOMENTUM` oben in `carousel.js`.
+- **Invariante:** Solange die Engine aktiv ist, **nie** CSS-`scroll-snap` auf `.carousel__track` reaktivieren — die Engine treibt `scrollLeft` selbst pro Frame.
+- **Invariante (Klick-Navigation):** Der Drag hört während eines aktiven Zeigers auf **`window`** (`pointermove`/`pointerup`), **niemals** `track.setPointerCapture()` benutzen. Pointer-Capture leitet `pointerdown`+`pointerup` auf den Track um → das daraus synthetisierte `click` landet auf dem Track statt auf dem `<a>` darin, und CTA-Links (`.cta` → `projekte.html`) navigieren per **Linksklick gar nicht** (Hover/Rechtsklick funktionieren weiter, weil sie kein synthetisches `click` brauchen). Klick-Unterdrückung nach echtem Drag passiert separat über den Capture-`click`-Handler, gated auf `moved` (Schwelle **>10px**, damit Mini-Jitter den Klick nicht schluckt).
+
+**Cluster-Indicators** (`.carousel__dots`, in JS generiert): `GROUP = 3` → **3 Balken** (1 je 3 Cards). Inaktiv **20×5** `--graue-strasse`, aktiv **80×5** (`width .55s`-Übergang). Die Orange ist eine eigene `.fill`-Ebene (`scaleX(0)` → bei `.is-active` `scaleX(1)`), die sich **richtungsabhängig einwischt**: der Scroll-Handler setzt `--fill-origin` auf `.carousel__dots` (vorwärts `left`, rückwärts `right`), `transform-origin` der Füllung folgt. Aktiver Cluster = Gruppe der Card, die der Snap-Linie (212px) am nächsten ist; Update läuft am `scroll`-Event.
+
+> **Verifikation im Preview:** `serve.py` cached `js/*.js` hart → nach JS-Edit am `<script>`-Tag temporär `?v=N` anhängen, testen, zurücksetzen. Headless-Preview feuert **kein** `requestAnimationFrame` und kein `scroll`-Event bei programmatischem `scrollLeft`; rAF-/scroll-getriebene Logik per `requestAnimationFrame`-Override (setTimeout) bzw. `dispatchEvent(new Event("scroll"))` prüfen.
+
+### Karten-Raster (USP + Specs)
+Gemeinsame Komponente für die **USP-Vorteile** (`index.html`) und die **Modell-Specs** (`modell-4c/7c.html`). Eine Karte ist **immer exakt 280×168** (`.card-pill`: feste `width`/`height`, `box-sizing: border-box`, 1px `--carbon-schwarz`, `border-radius: 40px`, weiß, `display:flex; flex-direction:column; justify-content:space-between`). Hover (beide gleich): `translateY(-8px)` + `--shadow-card`.
+
+**Raster** (`.card-grid`): `grid-template-columns: repeat(N, 280px)`, `gap: 16px`, **strikt 4 pro Reihe** ab `min-width: 1320px` (wo 4×280 + 3×16 = 1168px in den Container passen), darunter `2` (≥620px) bzw. `1` Spalte — die **Kartengröße bleibt immer 280×168**. Default linksbündig (`justify-content: start`); `.card-grid--end` schiebt den Rasterblock **rechtsbündig** (Specs).
+
+- **USP** (`.card-grid.usp__grid` mit `.card-pill.usp-card`): Icon oben, 2-zeiliger Text unten (`space-between`). Icon nie verzerrt → `.usp-card__icon { width:36px; height:36px; object-fit:contain }` (feste ~36×36-Box, Original-Proportionen via `contain`). Kopf (`.usp__head`) linksbündig, Grid linksbündig.
+- **Specs** (`.card-grid.card-grid--end.specs__grid` mit `.card-pill.spec`): **kein Icon**. `.spec` überschreibt `justify-content: flex-end` (Label + Wert als Paar unten linksbündig, `gap:.4rem`). Kopf (`.specs__head`, statt `stack-center`) **linksbündig** (`.section-title` → `text-align:left`), Grid **rechtsbündig**. Beide via zwei `.container` getrennt (Abstand aus `.section > .container + .container`).
+
+### Kontaktformular & Custom-Dropdown
+Das Formular (`.form-card`) ist eine **geteilte Komponente** — es steht ganz unten auf allen vier Inhaltsseiten (`index/modell-4c/modell-7c/projekte`) **und** ist der Hauptinhalt von `kontakt.html`. Änderungen am Formular immer in **allen fünf** Dateien spiegeln.
+
+`initDropdown()` (in `app.js`) ist **generisch für alle `[data-dropdown]`** und bedient zwei Felder: die **Modell-Auswahl** und die **Ländervorwahl** (`.dropdown--code`). Mechanik: `.dropdown__toggle`-Klick toggelt `.is-open` (→ zeigt `.dropdown__menu`), Option-Klick schreibt deren `data-value` in `.dropdown__value`, Außenklick + Escape schließen alle.
+
+**Ländervorwahl** (`.dropdown--code`, 10 EU-Länder mit Flaggen-Emoji, identisch in allen 5 Dateien): liegt in der schmalen `.field--code`-Pille, deshalb Menü `min-width: max-content` + `right:auto` (wächst nach rechts statt die Pille zu sprengen). Das `<ul class="dropdown__menu">` ist **scrollbar** (`max-height` + `overflow-y:auto`) und trägt **`data-lenis-prevent`** — sonst kapert Lenis das Mausrad und scrollt die Seite statt des Menüs.
+
+### Section-Insets & Full-Bleed
+Sektionen sind standardmäßig per innerem `.container` (`max-width: var(--content-max)` + `padding-inline: var(--gutter)`) eingerückt. Abweichungen (Stand zuletzt aus Figma):
+- **`.video-sec > .container`**: full-bleed (`max-width: none; padding-inline: 0`).
+- **`.galerie-gross > .container`**: `max-width: none; padding-inline: 32px` (32px Rand); `.galerie-gross__grid { gap: 16px }` + Inline-`margin-top: 16px` als 16px-Gaps zwischen den Bildframes.
+- **`.header__hero` / `.subhead__hero`** brechen aus dem zentrierten `.header`/`.subhead` (flex-column, `align-items:center`, `padding-inline: var(--gutter)`) auf **exakt 32px Viewport-Rand** aus — per `width: calc(100% + 2*var(--gutter) - 64px); margin-inline: calc(32px - var(--gutter)); max-width: none`. **Wichtig:** der Selektor muss `.header > .header__hero` bzw. `.subhead > .subhead__hero` sein (Spezifität), sonst gewinnt `.header > * / .subhead > * { max-width: 100% }` aus dem Responsive-Block und klemmt die Breite. `.subhead__title` (Chunko) ist fix `280px` (Mobile-Override bei ≤600px bleibt).
+
+### Animations-Hooks (Markup → JS)
+| Attribut | Effekt |
+|---|---|
+| `data-reveal[="up\|left\|right\|scale"]` | Einblend-Animation (ScrollTrigger) |
+| `data-parallax="0.2"` | Parallax-Faktor |
+| `data-float` | Schwebeanimation |
+| `.js-bounce` | Hover-Scale (GSAP) |
+| `data-illu-parallax` | Illustration-Parallax |
+| `data-phasen` | Phasen-Scrollytelling |
+| `data-carousel` / `data-carousel-track` | Karussell |
+| `data-faq` | FAQ-Akkordeon |
+| `data-dropdown` | Custom-Dropdown (Modell-Auswahl + Ländervorwahl) |
+| `data-lenis-prevent` | Element scrollt nativ (Lenis kapert das Rad nicht) — z.B. Vorwahl-Menü |
+
+## Inhalte & Assets
+
+- **Texte:** direkt im HTML, Sektions-Kommentare als Marker (`<!-- ===== SPECS 4C ===== -->`)
+- **Bilder:** Platzhalter (dunkle Slots). Echtes Bild mit Name aus `references/bildplan.md` in `assets/images/` ablegen → erscheint automatisch
+- **Illustrationen:** `assets/illustrations/` — gleicher Dateiname ersetzt die SVG
+- **Videos:** `assets/videos/` — Platzhalter-Slots, analog zu Bildern einpflegen
+- **Fonts:** `fonts/` — Chunko Bold (`.otf/.ttf/.woff2`) + Inter Tight Regular/Medium (`.ttf/.woff2`); alle lokal, kein CDN
+
+## Bekannte Einschränkungen
+
+- **Mobile/Tablet:** Nav auf ≤600px ausgeblendet (Prio 2, noch nicht umgesetzt)
+- **Bilder/Videos:** Platzhalter-Slots; echte Assets über `references/bildplan.md` einpflegen
