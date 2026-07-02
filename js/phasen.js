@@ -1,9 +1,13 @@
 /* =====================================================================
    TREFF. — phasen.js  (Scrollytelling)
-   • Baut die SVG-Verbindungslinie zwischen den Phasen (zwei 90°-Knicke
-     je Segment, mittig zwischen den Pillen).
-   • Linie „zeichnet" sich beim Scrollen (stroke-dashoffset, Bewegung).
-   • Aktive Phase voll farbig, andere zurückgenommen (Farbe statt Opacity).
+   • Baut je Segment eine eigene SVG-Verbindungslinie zwischen zwei Phasen
+     (zwei 90°-Knicke, mittig zwischen den Boxen), dazu ein Schluss-Segment
+     in das TREFF.-Badge.
+   • Jedes Segment „fließt" beim Scrollen nach unten in die nächste Phase
+     (stroke-dashoffset, per ScrollTrigger-scrub) — funktioniert dadurch für
+     JEDE Phase gleich, nicht nur für die erste.
+   • Gleichzeitig blendet die Zielphase weich ein (autoAlpha + y).
+   • Reduced Motion / kein GSAP: alles statisch sichtbar, Linie voll gezeichnet.
    ===================================================================== */
 (function () {
   "use strict";
@@ -19,88 +23,107 @@
     if (!wrap || !svg || phases.length < 2) return;
 
     const SVGNS = "http://www.w3.org/2000/svg";
-    let path = svg.querySelector("path");
-    if (!path) { path = document.createElementNS(SVGNS, "path"); svg.appendChild(path); }
+    const gsapOK = window.gsap && window.ScrollTrigger && !TREFF.reduced;
+
+    let segs = [];        // { path, target } je Segment
+    let triggers = [];    // ScrollTrigger-Instanzen zum Aufräumen
+
+    function clearSVG() {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      segs = [];
+    }
+
+    function centerNode(el) {
+      const wr = wrap.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      return {
+        cx: r.left + r.width / 2 - wr.left,
+        top: r.top - wr.top,
+        bottom: r.bottom - wr.top,
+      };
+    }
+
+    // Pfad: von Box A (unten, Mitte) mit zwei rechten Winkeln zu Box B (oben, Mitte)
+    function segPath(a, bCx, bTop) {
+      const midY = (a.bottom + bTop) / 2;
+      return `M ${a.cx} ${a.bottom} L ${a.cx} ${midY} L ${bCx} ${midY} L ${bCx} ${bTop}`;
+    }
 
     function build() {
-      const wrapRect = wrap.getBoundingClientRect();
+      clearSVG();
       const W = wrap.clientWidth, H = wrap.clientHeight;
       svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
 
-      const nodes = phases.map((p) => {
-        const pille = p.querySelector(".phase__pille");
-        const r = pille.getBoundingClientRect();
-        return {
-          cx: r.left + r.width / 2 - wrapRect.left,
-          top: r.top - wrapRect.top,
-          bottom: r.bottom - wrapRect.top,
-        };
-      });
-      let endNode = null;
-      if (end) {
-        const r = end.getBoundingClientRect();
-        endNode = { cx: r.left + r.width / 2 - wrapRect.left, top: r.top - wrapRect.top };
-      }
+      const nodes = phases.map((p) => centerNode(p.querySelector(".phase__pille")));
 
-      let d = "";
-      const seg = (a, bx, btop, abottom) => {
-        const midY = (abottom + btop) / 2;
-        d += `M ${a.cx} ${abottom} L ${a.cx} ${midY} L ${bx} ${midY} L ${bx} ${btop} `;
-      };
+      const specs = [];
       for (let i = 0; i < nodes.length - 1; i++) {
-        seg(nodes[i], nodes[i + 1].cx, nodes[i + 1].top, nodes[i].bottom);
+        specs.push({ d: segPath(nodes[i], nodes[i + 1].cx, nodes[i + 1].top), target: phases[i + 1] });
       }
-      if (endNode) {
-        const a = nodes[nodes.length - 1];
-        seg(a, endNode.cx, endNode.top, a.bottom);
+      if (end) {
+        const e = centerNode(end);
+        specs.push({ d: segPath(nodes[nodes.length - 1], e.cx, e.top), target: end });
       }
-      path.setAttribute("d", d);
-    }
 
-    build();
-
-    const gsapOK = window.gsap && window.ScrollTrigger && !TREFF.reduced;
-    if (gsapOK) {
-      const len = path.getTotalLength();
-      path.style.strokeDasharray = len;
-      path.style.strokeDashoffset = len;
-      gsap.to(path, {
-        strokeDashoffset: 0, ease: "none",
-        scrollTrigger: { trigger: wrap, start: "top 65%", end: "bottom 75%", scrub: true },
-      });
-
-      phases.forEach((p) => p.classList.add("is-dim"));
-      ScrollTrigger.create({
-        trigger: wrap, start: "top center", end: "bottom center",
-        onUpdate: () => {
-          const mid = window.innerHeight / 2;
-          let best = null, bestD = Infinity;
-          phases.forEach((p) => {
-            const r = p.getBoundingClientRect();
-            const c = r.top + r.height / 2;
-            const dd = Math.abs(c - mid);
-            if (dd < bestD) { bestD = dd; best = p; }
-          });
-          phases.forEach((p) => {
-            const on = p === best;
-            p.classList.toggle("is-active", on);
-            p.classList.toggle("is-dim", !on);
-          });
-        },
+      specs.forEach((s) => {
+        const path = document.createElementNS(SVGNS, "path");
+        path.setAttribute("d", s.d);
+        path.setAttribute("fill", "none");
+        svg.appendChild(path);
+        segs.push({ path, target: s.target });
       });
     }
+
+    function killTriggers() {
+      triggers.forEach((t) => t && t.kill && t.kill());
+      triggers = [];
+    }
+
+    function setup() {
+      killTriggers();
+      build();
+
+      if (!gsapOK) {
+        // Statisch: Linien voll sichtbar, Phasen sichtbar lassen
+        segs.forEach((s) => { s.path.style.strokeDasharray = "none"; s.path.style.strokeDashoffset = 0; });
+        return;
+      }
+
+      // Phase 1 blendet beim Eintritt ein (hat kein eingehendes Segment)
+      gsap.set(phases[0], { autoAlpha: 0, y: 24 });
+      const r0 = gsap.fromTo(phases[0],
+        { autoAlpha: 0, y: 24 },
+        { autoAlpha: 1, y: 0, ease: "none",
+          scrollTrigger: { trigger: phases[0], start: "top 88%", end: "top 60%", scrub: 0.6 } });
+      triggers.push(r0.scrollTrigger);
+
+      // Jedes Segment zeichnet sich beim Scrollen in seine Zielphase; die Phase
+      // blendet synchron ein. Der scrub lässt die Linie flüssig „mitfließen".
+      segs.forEach((s) => {
+        const len = s.path.getTotalLength();
+        s.path.style.strokeDasharray = len;
+        s.path.style.strokeDashoffset = len;
+
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: s.target, start: "top 92%", end: "top 55%", scrub: 0.6 },
+        });
+        tl.to(s.path, { strokeDashoffset: 0, ease: "none" }, 0);
+        if (s.target !== end) {
+          gsap.set(s.target, { autoAlpha: 0, y: 24 });
+          tl.fromTo(s.target, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, ease: "none" }, 0);
+        }
+        triggers.push(tl.scrollTrigger);
+      });
+
+      ScrollTrigger.refresh();
+    }
+
+    setup();
 
     let rt;
     window.addEventListener("resize", () => {
       clearTimeout(rt);
-      rt = setTimeout(() => {
-        build();
-        if (gsapOK) {
-          const len = path.getTotalLength();
-          path.style.strokeDasharray = len;
-          window.ScrollTrigger && ScrollTrigger.refresh();
-        }
-      }, 200);
+      rt = setTimeout(setup, 200);
     });
   };
 })();

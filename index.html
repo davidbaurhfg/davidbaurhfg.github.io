@@ -347,15 +347,26 @@
       <h2 data-reveal="scale">Jugendräume. Schnell. Günstig. Einfach.</h2>
     </section>
 
-    <!-- ===================== VIDEO TAGESABLAUF (2) ===================== -->
+    <!-- ===================== VIDEO EXPLOSION (Autoplay im View, Ping-Pong-Loop, keine UI) ===================== -->
     <section class="section video-sec">
       <div class="container">
-        <!-- SLOT: video tagesablauf 2 -->
+        <!-- Explosion.mp4: startet automatisch beim Scrollen in den View, keine Player-UI.
+             Ping-Pong (vor/zurück + 5s Halt) via js/video.js. `muted` ist Pflicht für Autoplay. -->
         <figure class="img-slot video-slot" style="--ar: 16/9" data-reveal>
-          <video controls playsinline preload="none" poster="assets/images/video-tagesablauf-2-poster.jpg">
-            <source src="assets/videos/tagesablauf-2.mp4" type="video/mp4" />
+          <video data-video-pingpong muted playsinline preload="auto" disablepictureinpicture tabindex="-1" aria-label="Explosion">
+            <source src="assets/videos/Explosion.mp4" type="video/mp4" />
           </video>
         </figure>
+      </div>
+      <!-- Legende zum Video (direkt darunter) -->
+      <div class="video-legend" data-reveal>
+        <ul class="video-legend__list">
+          <li class="video-legend__item"><span class="video-legend__swatch" style="background: var(--graue-strasse);"></span>Außen Hülle</li>
+          <li class="video-legend__item"><span class="video-legend__swatch" style="background: var(--wilde-malve);"></span>Dämmung</li>
+          <li class="video-legend__item"><span class="video-legend__swatch" style="background: var(--kieselstein);"></span>Verlattung</li>
+          <li class="video-legend__item"><span class="video-legend__swatch" style="background: #2A2A2A;"></span>Innenwand</li>
+          <li class="video-legend__item"><span class="video-legend__swatch" style="background: #7C4F2A;"></span>Holzboden</li>
+        </ul>
       </div>
     </section>
 
@@ -521,5 +532,6 @@
   <script src="js/parallax.js"></script>
   <script src="js/phasen.js"></script>
   <script src="js/carousel.js"></script>
-  <script src="js/faq.js"></script></body>
+  <script src="js/faq.js"></script>
+  <script src="js/video.js"></script></body>
 </html>

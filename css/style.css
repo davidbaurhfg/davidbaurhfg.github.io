@@ -172,7 +172,7 @@ h1, h2, h3, h4 {
 }
 .eyebrow::before {
   content: ""; width: .7em; height: .7em;
-  background: var(--flammen-orange); border-radius: 2px;
+  background: var(--flammen-orange); border-radius: 0;
 }
 
 /* Section-Headline (Inter Tight, mittig) — z.B. Modelle/Projekte */
@@ -451,7 +451,7 @@ h1, h2, h3, h4 {
 
 /* Eyebrow-Größe & Farbvarianten (Figma: 16px-Quadrat + 24px Text) */
 .eyebrow { font-size: clamp(1.05rem, .9rem + .55vw, 1.5rem); gap: .5em; }
-.eyebrow::before { width: .65em; height: .65em; border-radius: 2px; }
+.eyebrow::before { width: .65em; height: .65em; border-radius: 0; }
 .eyebrow--gelb::before  { background: var(--schulbus-gelb); }
 .eyebrow--gruen::before { background: var(--helle-fichte); }
 .eyebrow--lila::before  { background: var(--lila-traube); }
@@ -570,33 +570,85 @@ h1, h2, h3, h4 {
 .saeulen__text { max-width: 1040px; }
 
 /* ---------- PHASEN (Scrollytelling) ---------- */
-.phasen__wrap { position: relative; display: flex; flex-direction: column; gap: clamp(2.5rem, 6vw, 6rem); padding-block: 2rem; }
-.phasen__lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-.phasen__lines path { fill: none; stroke: var(--carbon-schwarz); stroke-width: 2; }
-.phase { display: flex; align-items: center; gap: clamp(1rem, 3vw, 3rem); transition: color var(--t-med) var(--ease-out); }
-.phase--right { justify-content: flex-end; }
-.phase--left { justify-content: flex-start; flex-direction: row-reverse; }
-.phase__num { font-family: var(--font-body); font-weight: 400; font-size: clamp(1rem, 1.4vw, 1.5rem); color: inherit; white-space: nowrap; }
-.phase__pille {
-  position: relative; max-width: min(560px, 80%);
-  border: 1px solid currentColor; border-radius: 32px;
-  padding: clamp(1.5rem, 2.5vw, 2.5rem);
-  display: flex; flex-direction: column; gap: .9rem; background: var(--bg);
+/* Full-bleed bis auf 60px Rand; Inhalt füllt die Breite (Override der .container-Regel) */
+.phasen > .container { max-width: none; margin-inline: auto; padding-inline: 60px; }
+
+.phasen__wrap {
+  position: relative;
+  display: flex; flex-direction: column;
+  gap: clamp(2.5rem, 5vw, 5.5rem);
+  padding-block: clamp(2rem, 5vw, 4rem);
 }
+.phasen__lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 0; }
+.phasen__lines path { fill: none; stroke: var(--carbon-schwarz); stroke-width: 2; }
+
+/* Reihe = Label + Box; abwechselnd rechts (ungerade) / links (gerade) gestaffelt,
+   jede Reihe füllt die volle Breite → Boxen verteilen sich von Rand zu Rand */
+.phase {
+  position: relative; z-index: 1;
+  display: flex; align-items: center;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+  width: 100%; color: var(--carbon-schwarz);
+}
+.phase--right { justify-content: flex-end; }                              /* [Label][Box] am rechten Rand   */
+.phase--left  { justify-content: flex-end; flex-direction: row-reverse; } /* [Box][Label] am linken Rand     */
+
+.phase__num {
+  flex: 0 0 auto; color: inherit; white-space: nowrap;
+  font-family: var(--font-body); font-weight: 400;
+  font-size: clamp(1.1rem, 1.5vw, 1.75rem);
+}
+
+/* Box: fluide Breite, in der Mitte überlappend → Zickzack wie in Figma */
+.phase__pille {
+  position: relative;
+  width: min(1040px, 60%);
+  border: 1px solid var(--carbon-schwarz); border-radius: 40px;
+  padding: clamp(1.75rem, 3.2vw, 56px);
+  background: var(--bg);
+  display: flex; flex-direction: row; align-items: flex-start;
+  justify-content: space-between; gap: clamp(1.5rem, 4vw, 120px);
+}
+.phase__title {
+  flex: 0 1 376px; max-width: 376px;
+  font-family: var(--font-body); font-weight: 400;
+  font-size: clamp(1.5rem, 2.4vw, 42px); line-height: 1.15;
+}
+.phase__desc {
+  flex: 0 1 432px; min-width: 0; max-width: 432px; color: inherit;
+  font-size: clamp(1rem, 1.2vw, 24px); line-height: 1.4;
+}
+
+/* Verbindungspunkte (16px Quadrate mittig ober-/unterhalb der Box) */
 .phase__pille::before, .phase__pille::after {
   content: ""; position: absolute; left: 50%; transform: translateX(-50%);
-  width: 13px; height: 13px; background: currentColor; border-radius: 3px;
+  width: 16px; height: 16px; background: var(--carbon-schwarz); border-radius: 2px; z-index: 1;
 }
-.phase__pille::before { top: -7px; }
-.phase__pille::after  { bottom: -7px; }
-.phase:first-child .phase__pille::before { display: none; } /* P1 keine obere Verbindung */
-.phase__title { font-family: var(--font-body); font-weight: 400; font-size: clamp(1.3rem, 2vw, 2rem); line-height: 1.1; }
-.phase__desc { font-size: clamp(.95rem, 1.1vw, 1.15rem); line-height: 1.5; color: inherit; max-width: 42ch; }
-/* aktiv = volle Farbe, sonst zurückgenommen (Farbe statt Opacity) */
-.phase { color: var(--carbon-schwarz); }
-.phase.is-dim { color: var(--heller-stein-50, #cfcfcf); }
-.phase.is-dim { color: #c9c9c9; }
-.phasen__end { display: flex; justify-content: center; margin-top: clamp(1rem, 3vw, 3rem); }
+.phase__pille::before { top: -8px; }
+.phase__pille::after  { bottom: -8px; }
+.phase:first-of-type .phase__pille::before { display: none; } /* Phase 1: kein oberer Punkt */
+
+.phasen__end { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: clamp(1.5rem, 4vw, 4rem); }
+
+/* Box-Text untereinander, sobald nebeneinander zu eng würde (Figma-Nebeneinander nur auf großen Screens) */
+@media (max-width: 1499px) {
+  .phase__pille { flex-direction: column; justify-content: flex-start; gap: clamp(.6rem, 1.6vw, 1rem); }
+  .phase__title { flex: 0 1 auto; max-width: none; }
+  .phase__desc  { flex: 0 1 auto; max-width: 60ch; }
+}
+/* Stagger etwas kompakter, Boxen breiter */
+@media (max-width: 900px) {
+  .phase__pille { width: min(760px, 76%); }
+}
+/* Mobile: kein Stagger — alles linksbündig, gerade vertikale Linie */
+@media (max-width: 680px) {
+  .phasen > .container { padding-inline: 20px; }
+  .phasen__wrap { gap: clamp(2rem, 8vw, 3rem); }
+  .phase, .phase--left, .phase--right {
+    flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: .6rem;
+  }
+  .phase__pille { width: 100%; }
+}
 .container-badge {
   background: var(--carbon-schwarz); border-radius: 18px;
   padding: clamp(1.4rem, 2.5vw, 2.4rem) clamp(1.8rem, 3.5vw, 3.5rem);
@@ -726,6 +778,22 @@ h1, h2, h3, h4 {
   max-width: none;
   padding-inline: 0;
 }
+/* Video-Legende: zentrierte Farb-Legende direkt unter dem Video (Figma 2842:20891).
+   16px-Swatch + Inter-Tight-Label (24px am Max). Zentriert, bricht auf schmalen Screens um. */
+.video-legend { background: var(--schnee-weiss); padding-block: clamp(1.5rem, 3vw, 2.5rem); }
+.video-legend__list {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 1rem clamp(1.5rem, 7.5vw, 7rem);        /* col-gap bis 112px (Figma), row-gap 1rem beim Umbruch */
+  max-width: var(--content-max); margin: 0 auto; padding-inline: var(--gutter);
+  list-style: none;
+}
+.video-legend__item {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-body); font-weight: 400;
+  font-size: clamp(1.05rem, .85rem + .7vw, 1.5rem); line-height: 1;
+  color: var(--carbon-schwarz); white-space: nowrap;
+}
+.video-legend__swatch { width: 16px; height: 16px; flex: 0 0 auto; }   /* box-sizing:border-box → 16px inkl. Rand */
 /* galerie-gross: volle Breite, aber genau 32px Rand links/rechts zum Viewport. */
 .galerie-gross > .container {
   max-width: none;

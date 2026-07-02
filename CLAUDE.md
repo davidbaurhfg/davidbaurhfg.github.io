@@ -18,9 +18,6 @@ python3 serve.py                   # Port 8754 (Default; respektiert sonst $PORT
 
 # Animationen deaktivieren (Reduced-Motion-Test):
 # ?still=1 an URL anhängen
-
-# Loader-Animation neu abspielen (läuft sonst 1×/Session):
-# sessionStorage.clear() in der Browser-Konsole, dann Reload
 ```
 
 Der Ordner liegt **lokal** (`~/CLAUDE/9_VIBE`, nicht mehr im Google Drive). `serve.py` liefert sein eigenes Verzeichnis aus (`os.path.dirname(__file__)`) — robust gegen Verschieben — und liest den Port aus `$PORT` (Default 8754).
@@ -41,52 +38,50 @@ Der Ordner liegt **lokal** (`~/CLAUDE/9_VIBE`, nicht mehr im Google Drive). `ser
 
 Farben: `--lila-traube #9696FF`, `--wilde-malve #E5B3FF`, `--flammen-orange #FF4C02`, `--schulbus-gelb #FFC800`, `--helle-fichte #00812B`, `--dunkle-fichte #004F1A`, `--kieselstein #696969`, `--carbon-schwarz #1A1A1A`, `--schnee-weiss #FFFFFF`, `--graue-strasse #E5E6E6`.
 
-Schriften: **Chunko Bold** (Headlines, Logo), **Inter Tight Regular/Medium** (Body, UI). Hintergrund immer `--schnee-weiss`.
+Schriften: **Chunko Bold** (Headlines, Logo), **Inter Tight Regular/Medium** (Body, UI). Hintergrund immer `--schnee-weiss`. **Chunko ist sehr breit** (~10× Fontgröße pro Zeichen): fluide Display-Headlines auf randlosen Bannern (`.stoerer h2` → `font-size: clamp(1.5rem, 8vw, 11rem)`, `overflow-x:clip`, `hyphens:auto`) müssen mit der Viewport-Breite skalieren, damit auch das längste Wort („Planungsaufwand") auf Mobile/kleinen Laptops in die Zeile passt statt rechts abgeschnitten zu werden. **Nie** eine fixe/zu große Größe (`--fs-display`) auf `.stoerer h2` legen.
 
 Spacing: 4/8-Raster (`--space-1` … `--space-10`). Type-Scale fluid (`clamp()`). Radien: `--r-pill: 9999px`, `--r-lg: 28px`, `--r-md: 18px`.
 
 ## JavaScript-Architektur
 
-### Ladereihenfolge (identisch in allen 5 HTML-Dateien, am Ende von `<body>`)
+### Ladereihenfolge (am Ende von `<body>`)
 ```
-js/lib/gsap.min.js → ScrollTrigger → Draggable → js/lib/lenis.min.js → app.js → parallax.js → phasen.js → carousel.js → faq.js → loader.js
+js/lib/gsap.min.js → ScrollTrigger → Draggable → js/lib/lenis.min.js → app.js → parallax.js → phasen.js → carousel.js → faq.js
 ```
-Alle Libs liegen in `js/lib/` (lokal, kein CDN). `loader.js` steht im Markup **zuletzt**, seine IIFE läuft aber trotzdem **sofort beim Parsen** (synchrones Script, vor `DOMContentLoaded`) — sie braucht nur das bereits im HTML liegende Overlay, kein gebootetes `app.js`. `app.js` hängt sein `boot()` an `DOMContentLoaded` (bzw. ruft sofort, falls DOM schon geladen). Die Feature-Module (`parallax/phasen/carousel/faq`) registrieren beim Parsen nur ihre `TREFF.init*`-Funktionen; aufgerufen werden sie zentral aus `boot()`.
+In allen 5 HTML-Dateien identisch — **Ausnahme:** `index.html` lädt danach zusätzlich `js/video.js` (nur dort gibt es das Explosion-Video). Alle Libs liegen in `js/lib/` (lokal, kein CDN). `app.js` hängt sein `boot()` an `DOMContentLoaded` (bzw. ruft sofort, falls DOM schon geladen). Die Feature-Module (`parallax/phasen/carousel/faq`) registrieren beim Parsen nur ihre `TREFF.init*`-Funktionen; aufgerufen werden sie zentral aus `boot()`. **Es gibt keine Loader-/Intro-Animation mehr** — beim Öffnen landet man direkt auf dem Header.
 
 ### `js/app.js` — Motion-Core
 `boot()` ruft in dieser Reihenfolge auf (Quelle der Wahrheit, nicht die Definitionsreihenfolge im File):
 `initImageSlots()` → `initDropdown()` → `initSmoothScroll()` (Lenis ↔ GSAP-Ticker) → `initAnchorScroll()` → `initNav()` → **nur `hasGSAP && !REDUCED`:** `initReveals()` + `initParallax()` → **nur `hasGSAP`:** `initFloating()` + `initBounce()` → Feature-Module in fester Reihenfolge `["initPhasen","initParallaxExtra","initCarousel","initFAQ"]` (jeweils nur falls als `TREFF.*` registriert, `try/catch`-umschlossen) → `ScrollTrigger.refresh()`.
 
-**`initReveals()`**: Setzt `autoAlpha:0` auf alle `[data-reveal]`-Elemente beim Start. Elemente ohne `data-reveal`-Attribut werden **nie** ausgeblendet — wichtig bei der Loader-Sequenz. Header-Logo (`.header__logo`) und Header-Hero (`.header__hero`) haben **kein** `data-reveal`, damit der Loader sie kontrollieren kann.
+**`initReveals()`**: Setzt `autoAlpha:0` auf alle `[data-reveal]`-Elemente beim Start. Elemente ohne `data-reveal`-Attribut werden **nie** ausgeblendet. Header-Logo (`.header__logo`) und Header-Hero (`.header__hero`) haben bewusst **kein** `data-reveal` → ab dem ersten Frame sichtbar (klassischer Header-Einstieg).
 
 **`initBounce()`**: Alle `.js-bounce`-Elemente skalieren auf hover auf `1.06` (GSAP), außer `.nav__pill--cta` → `1.03` (explizite Ausnahme in app.js).
 
 **`initNav()`**: Nur `is-scrolled`-Klasse per Scroll-Position, **kein** Auto-Hide beim Runterscrollen.
 
-### `js/loader.js` — 4-Phasen State Machine (1×/Session)
-
-```
-Phase 1: intro-hidden-ui      Weißer Screen, gesamte UI versteckt (body.is-intro)
-Phase 2: logo-loading-follow  Logo füllt sich grau→schwarz (Wasserlinie) + folgt Maus
-Phase 3: logo-transition      Logo fliegt von Cursor-Position in Header (Single-Node-Morph)
-Phase 4: header-active        Cursor zurück, UI eingeblendet, Nav gleitet von unten rein
-```
-
-**Kritische Invarianten:**
-- `body.is-intro .header > *` → `visibility: hidden` (NICHT `display:none` — Layout-Box muss für `getBoundingClientRect()` erhalten bleiben)
-- `headerImg.style.visibility = "visible"` + `loader.hidden = true` im selben JS-Tick (atomarer Tausch, kein 1-Frame-Loch)
-- `gsap.killTweensOf(logo)` vor dem Flug (beendet quickTo-Cursor-Tweens)
-- `neutralizeHeaderReveal()` löscht `data-reveal` vom Header-Logo und killt zugehörige ScrollTrigger, bevor `initReveals()` laufen kann
-- Nav-Einblendung via CSS-Klasse (`is-hidden` toggle + double-rAF), **kein GSAP-Transform** auf der Nav (würde `translateX(-50%)` brechen)
-- Guards: `SEEN || !hasGSAP || REDUCED` → direkt in Phase 4
-
-**Wasserlinien-SVG** (`buildWave`): 64-Segment-Sinuspfad, `PERIOD=50`, `W=150` (100 + eine Periode extra → `xPercent:-33.333%` Loop ist phasen-kontinuierlich, kein sichtbarer Sprung). LinearGradient: `--kieselstein` (grau, Kamm) → `--carbon-schwarz` (schwarz, Körper). Dauer: 6s Desktop / 5.2s Touch.
+### Loader / Intro-Animation — entfernt
+Es gibt **keinen Loader mehr** (`js/loader.js` gelöscht; Overlay-Markup, `body.is-loading`/`is-intro`, `.loader*`-CSS und der Script-Tag aus allen 5 Seiten entfernt). Beim Öffnen erscheint sofort der Header. Falls je wieder eine Intro gewünscht ist: neu bauen, nicht aus alten Ständen zurückholen.
 
 ### `js/phasen.js` — Scrollytelling
-SVG-Linie mit 2×90°-Knicken, aktive/abgedimmte Phase per ScrollTrigger. Markup-Hook: `data-phasen`.
+Zickzack-Ablauf der 6 Bau-Phasen (nur `index.html`). Markup-Hook: `data-phasen` (Section) → `data-phasen-wrap` (Position-Parent) → `data-phasen-lines` (leeres `<svg>`, JS befüllt es) → je Phase `data-phase` mit `.phase--right`/`.phase--left` → `data-phase-end` (TREFF.-Badge). **Ungerade Phasen (1/3/5) = Box rechts (`.phase--right`), gerade (2/4/6) = Box links (`.phase--left`)** — falls das je gedreht werden soll, im HTML nur die `--right`/`--left`-Klassen tauschen (Figma + Referenz-Screenshot haben Phase 1 rechts).
+
+- **Pro Übergang ein eigenes `<path>`** (nicht mehr eine durchgehende Linie): `build()` liest die Box-Mitten (`.phase__pille`-Rects relativ zum Wrap) und erzeugt je Segment einen 2×90°-Knick-Pfad von Box-Unterkante-Mitte → `midY` → nächste Box-Oberkante-Mitte, plus ein Schluss-Segment in `data-phase-end`. viewBox = `0 0 clientWidth clientHeight`, `preserveAspectRatio="none"` (viewBox == Pixelgröße → keine Verzerrung).
+- **Jedes Segment „fließt" in SEINE Zielphase** per eigenem `ScrollTrigger` (`trigger: zielphase, start "top 92%", end "top 55%", scrub: 0.6`) → `strokeDashoffset len→0`. Dadurch animiert **jede** Phase gleich (früher zog eine einzige `scrub`-Linie über die ganze Section → nur die erste Phase lief sauber). Die Zielphase blendet **synchron** im selben Timeline (`autoAlpha 0→1` + `y 24→0`, `ease:"none"`) ein. Phase 1 hat kein eingehendes Segment → eigener Reveal-Trigger.
+- **`scrub: 0.6`** glättet den Verlauf (flüssiges Mitfließen). **Kein** `is-active`/`is-dim`-Dimming mehr — der Reveal (`autoAlpha`) *ist* der „Phase für Phase"-Effekt; Phasen bleiben nach dem Einblenden sichtbar.
+- **Resize:** `setup()` (debounced 200ms) = `killTriggers()` → `build()` neu → Trigger neu + `ScrollTrigger.refresh()`. **Reduced Motion / kein GSAP:** alle Segmente sofort `strokeDashoffset:0`, Phasen bleiben CSS-sichtbar (kein `autoAlpha:0` gesetzt).
+- **Layout (CSS):** Section ist full-bleed bis **60px Rand** (`.phasen > .container` überschreibt `.container`). Jede `.phase` ist eine 100%-breite Flex-Reihe; `.phase--left` nutzt `flex-direction: row-reverse` **+ `justify-content: flex-end`** (nicht `flex-start` — in row-reverse packt `flex-start` nach *rechts*, das war der alte „alles rechtsbündig"-Bug). Box `width: min(1040px, 60%)` → linke/rechte Boxen bündig am 60px-Rand, in der Mitte überlappend (Zentren ~32%/68%) = Zickzack. Box-Innen: Titel + Beschreibung **nebeneinander** (`space-between`, ab ≥1500px), 16px-Verbindungspunkte via `::before/::after`. Responsive: ≤1499px Text gestapelt, ≤680px kein Stagger (alles linksbündig, gerade vertikale Linie).
 
 ### `js/parallax.js`
 Eigenständiges Modul. Hook: `data-illu-parallax`.
+
+### `js/video.js` — Explosion-Video (Ping-Pong)
+**Nur auf `index.html`** (Script-Tag nur dort, nach `faq.js`). Selbst-initialisierendes IIFE (kein `boot()`-Hook). Hook: `[data-video-pingpong]` am `<video>` in der **unteren** `.video-sec` (`assets/videos/Explosion.mp4`). Verhalten:
+- **Autoplay per IntersectionObserver** (ab ~35% im View), pausiert wieder beim Verlassen (spart CPU beim Rückwärts-Seeking). Video ist `muted` (Pflicht für Autoplay), **`controls` entfernt** (keine Player-UI), `preload="auto"` (voll gepuffert → Rückwärts-Seeking).
+- **Ping-Pong-Loop:** vorwärts (normale Geschwindigkeit) → **5s Halt am letzten Frame** → rückwärts → **5s Halt am ersten Frame** → wiederholen. Halt via `setTimeout(5000)`.
+- **Rückwärts wird manuell per rAF getrieben** (`backT -= dt` → `video.currentTime = backT`), weil Browser **negative `playbackRate` ignorieren**. Glätte hängt komplett an der **Keyframe-Dichte** des Encodes (Seek springt auf den vorherigen Keyframe). Deshalb ist `Explosion.mp4` bewusst **neu kodiert**: 4K-Original (`Explosion-original.mp4.bak`, 24fps, nur ~2 Keyframes) → **1600×906, Keyframe alle 6 Frames** (`ffmpeg -vf scale=1600:-2 -g 6 -keyint_min 6 -sc_threshold 0 -crf 20 -an`). Rückwärts-Seeks dadurch von ~50–110ms auf **~0–1ms** → flüssig. **Nicht** wieder auf einen Encode mit sparse Keyframes zurück, sonst hakt der Rückwärtslauf.
+- **`loop` MUSS aus sein** (sonst feuert `ended` nie → kein Ping-Pong). Reduced Motion / kein IO → statisch beim ersten Frame, kein Loop/Autoplay.
+- **Video-Legende** (`.video-legend`, direkt in `.video-sec` unter dem Video, aus Figma 2842:20891): zentrierte Flex-Row aus 5 `.video-legend__item` (16px-`__swatch` + Inter-Tight-Label). Reihenfolge/Farben (Swatch-Farbe inline): Außen Hülle `--graue-strasse`, Dämmung `--wilde-malve`, Verlattung `--kieselstein`, Innenwand `#2A2A2A`, Holzboden `#7C4F2A` (die letzten beiden ohne Token). `col-gap: clamp(1.5rem, 7.5vw, 7rem)` (bis 112px wie Figma), bricht auf schmalen Screens um.
 
 ### `js/faq.js` — Akkordeon (native `<details>` + GSAP)
 Hook: `data-faq`. Nur ein Eintrag gleichzeitig offen; `summary`-Klick `preventDefault` + manuelles Toggle. Höhe **und** Eck-Radius morphen GSAP-synchron (`fromTo height 0↔scrollHeight` + `borderRadius` halbe-Höhe↔40px), Inhalt blendet per `autoAlpha`+`y` ein. Reduced-Motion/kein-GSAP → sofort auf/zu.
@@ -114,7 +109,7 @@ Alle Feature-Module greifen über `window.TREFF` auf diese Werte zu — kein dir
 ### Nav (`.nav`)
 Fixed, **unten mittig** (`bottom: 24px; left: 50%; transform: translateX(-50%)`). Liquid-Glass-Pille. Hover-Farben: Home→Lila, Text→Dunkle-Fichte, CTA→Schulbus-Gelb.
 
-`body.is-intro .nav` und `.nav.is-hidden` halten die Nav versteckt (`translateX(-50%) translateY(160%)`). **Niemals GSAP auf die Nav-Transform anwenden** — würde die `translateX(-50%)`-Zentrierung zerstören.
+Die Nav ist ab dem ersten Frame sichtbar (kein Intro/Loader mehr). **Niemals GSAP auf die Nav-Transform anwenden** — würde die `translateX(-50%)`-Zentrierung zerstören.
 
 Desktop-only (≤600px ausgeblendet, Prio 2).
 
@@ -175,6 +170,7 @@ Das Formular (`.form-card`) ist eine **geteilte Komponente** — es steht ganz u
 Sektionen sind standardmäßig per innerem `.container` (`max-width: var(--content-max)` + `padding-inline: var(--gutter)`) eingerückt. Abweichungen (Stand zuletzt aus Figma):
 - **`.video-sec > .container`**: full-bleed (`max-width: none; padding-inline: 0`).
 - **`.galerie-gross > .container`**: `max-width: none; padding-inline: 32px` (32px Rand); `.galerie-gross__grid { gap: 16px }` + Inline-`margin-top: 16px` als 16px-Gaps zwischen den Bildframes.
+- **`.phasen > .container`**: `max-width: none; padding-inline: 60px` (60px Rand) — der Phasen-Zickzack füllt die Breite bis auf 60px links/rechts; ≤680px auf 20px reduziert (siehe [`js/phasen.js`](#jsphasenjs--scrollytelling)).
 - **`.header__hero` / `.subhead__hero`** brechen aus dem zentrierten `.header`/`.subhead` (flex-column, `align-items:center`, `padding-inline: var(--gutter)`) auf **exakt 32px Viewport-Rand** aus — per `width: calc(100% + 2*var(--gutter) - 64px); margin-inline: calc(32px - var(--gutter)); max-width: none`. **Wichtig:** der Selektor muss `.header > .header__hero` bzw. `.subhead > .subhead__hero` sein (Spezifität), sonst gewinnt `.header > * / .subhead > * { max-width: 100% }` aus dem Responsive-Block und klemmt die Breite. `.subhead__title` (Chunko) ist fix `280px` (Mobile-Override bei ≤600px bleibt).
 
 ### Animations-Hooks (Markup → JS)
@@ -190,13 +186,14 @@ Sektionen sind standardmäßig per innerem `.container` (`max-width: var(--conte
 | `data-faq` | FAQ-Akkordeon |
 | `data-dropdown` | Custom-Dropdown (Modell-Auswahl + Ländervorwahl) |
 | `data-lenis-prevent` | Element scrollt nativ (Lenis kapert das Rad nicht) — z.B. Vorwahl-Menü |
+| `data-video-pingpong` | Video: Autoplay im View, keine UI, Vor-/Rückwärts-Loop mit 5s-Halt (`js/video.js`, nur index) |
 
 ## Inhalte & Assets
 
 - **Texte:** direkt im HTML, Sektions-Kommentare als Marker (`<!-- ===== SPECS 4C ===== -->`)
 - **Bilder:** Platzhalter (dunkle Slots). Echtes Bild mit Name aus `references/bildplan.md` in `assets/images/` ablegen → erscheint automatisch
 - **Illustrationen:** `assets/illustrations/` — gleicher Dateiname ersetzt die SVG
-- **Videos:** `assets/videos/` — Platzhalter-Slots, analog zu Bildern einpflegen
+- **Videos:** `assets/videos/` — Platzhalter-Slots, analog zu Bildern einpflegen. **Ausnahme:** die untere `.video-sec` auf `index.html` bindet `Explosion.mp4` mit Ping-Pong-Autoplay ein (siehe [`js/video.js`](#jsvideojs--explosion-video-ping-pong)).
 - **Fonts:** `fonts/` — Chunko Bold (`.otf/.ttf/.woff2`) + Inter Tight Regular/Medium (`.ttf/.woff2`); alle lokal, kein CDN
 
 ## Bekannte Einschränkungen

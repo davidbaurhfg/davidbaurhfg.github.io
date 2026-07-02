@@ -5,3 +5,6 @@
 # Editor / OS junk
 Thumbs.db
 *.swp
+
+# Lokale Backups (nicht deployen, z.B. 4K-Originalvideo)
+*.bak
