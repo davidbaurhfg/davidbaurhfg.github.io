@@ -75,8 +75,12 @@ Zickzack-Ablauf der 6 Bau-Phasen (nur `index.html`). Markup-Hook: `data-phasen` 
 ### `js/parallax.js`
 Eigenständiges Modul. Hook: `data-illu-parallax`.
 
-### `js/video.js` — Explosion-Video (Ping-Pong)
-**Nur auf `index.html`** (Script-Tag nur dort, nach `faq.js`). Selbst-initialisierendes IIFE (kein `boot()`-Hook). Hook: `[data-video-pingpong]` am `<video>` in der **unteren** `.video-sec` (`assets/videos/Explosion.mp4`). Verhalten:
+### `js/video.js` — Videos (Explosion Ping-Pong + Tagesablauf Loop)
+**Nur auf `index.html`** (Script-Tag nur dort, nach `faq.js`). Selbst-initialisierendes IIFE (kein `boot()`-Hook). Zwei Hooks: `[data-video-pingpong]` (Explosion, unten) und `[data-video-loop]` (Tagesablauf, oben). Gemeinsame `VIEW_RATIO = 0.35` (IntersectionObserver-Schwelle).
+
+**`[data-video-loop]` — Tagesablauf** (`assets/videos/Tagesablauf.mp4`, obere `.video-sec`): **nahtloser Dauer-Loop** über natives `loop` (Browser-Neustart → kein Cut/Ruckler am Übergang), **Autoplay nur im View** (IntersectionObserver), **Pause beim Verlassen** (läuft nicht im Hintergrund weiter). Markup ohne `controls` + `disablepictureinpicture` + `tabindex="-1"` → keine Player-UI, keine Interaktion; `muted` (Autoplay-Pflicht), `preload="auto"`. Video ist 1920×1080 = exakt 16:9 → füllt den 16/9-Frame via `object-fit: cover` randabfallend ohne Balken. Reduced Motion / kein IO → statisch beim ersten Frame. **Kein** `autoplay`-Attribut (sonst liefe es out-of-view) — Start kommt aus `setupLoop()`.
+
+**`[data-video-pingpong]` — Explosion** (`assets/videos/Explosion.mp4`, **untere** `.video-sec`). Verhalten:
 - **Autoplay per IntersectionObserver** (ab ~35% im View), pausiert wieder beim Verlassen (spart CPU beim Rückwärts-Seeking). Video ist `muted` (Pflicht für Autoplay), **`controls` entfernt** (keine Player-UI), `preload="auto"` (voll gepuffert → Rückwärts-Seeking).
 - **Ping-Pong-Loop:** vorwärts (normale Geschwindigkeit) → **5s Halt am letzten Frame** → rückwärts → **5s Halt am ersten Frame** → wiederholen. Halt via `setTimeout(5000)`.
 - **Rückwärts wird manuell per rAF getrieben** (`backT -= dt` → `video.currentTime = backT`), weil Browser **negative `playbackRate` ignorieren**. Glätte hängt komplett an der **Keyframe-Dichte** des Encodes (Seek springt auf den vorherigen Keyframe). Deshalb ist `Explosion.mp4` bewusst **neu kodiert**: 4K-Original (`Explosion-original.mp4.bak`, 24fps, nur ~2 Keyframes) → **1600×906, Keyframe alle 6 Frames** (`ffmpeg -vf scale=1600:-2 -g 6 -keyint_min 6 -sc_threshold 0 -crf 20 -an`). Rückwärts-Seeks dadurch von ~50–110ms auf **~0–1ms** → flüssig. **Nicht** wieder auf einen Encode mit sparse Keyframes zurück, sonst hakt der Rückwärtslauf.
@@ -173,6 +177,12 @@ Sektionen sind standardmäßig per innerem `.container` (`max-width: var(--conte
 - **`.phasen > .container`**: `max-width: none; padding-inline: 60px` (60px Rand) — der Phasen-Zickzack füllt die Breite bis auf 60px links/rechts; ≤680px auf 20px reduziert (siehe [`js/phasen.js`](#jsphasenjs--scrollytelling)).
 - **`.header__hero` / `.subhead__hero`** brechen aus dem zentrierten `.header`/`.subhead` (flex-column, `align-items:center`, `padding-inline: var(--gutter)`) auf **exakt 32px Viewport-Rand** aus — per `width: calc(100% + 2*var(--gutter) - 64px); margin-inline: calc(32px - var(--gutter)); max-width: none`. **Wichtig:** der Selektor muss `.header > .header__hero` bzw. `.subhead > .subhead__hero` sein (Spezifität), sonst gewinnt `.header > * / .subhead > * { max-width: 100% }` aus dem Responsive-Block und klemmt die Breite. `.subhead__title` (Chunko) ist fix `280px` (Mobile-Override bei ≤600px bleibt).
 
+### Bachelor-Credits (`.bachelor`)
+**Nur `index.html`**, steht als `<section>` **bewusst UNTER `</footer>`** (außerhalb `<main>`) — nicht „reparieren" durch Verschieben nach innen. Dunkler Full-Width-Block (`--carbon-schwarz`), zentriert; „■ Bachelorarbeit" (16px `--flammen-orange`-Quadrat + Text), zwei Namen nebeneinander (Name 42px / Rolle 24px), großer Abstand, unten Hochschule/Semester in `rgba(230,230,230,.5)`. 1:1 aus Figma `2626:10928` (pt 220 / pb 80 / gap 320 → als fluide `clamp()` umgesetzt).
+
+### Container-Badge (`.container-badge`)
+Schwarzer Kasten mit TREFF.-Wortmarke am Ende des Phasen-Zickzacks (`data-phase-end`, nur `index.html`). `background: --carbon-schwarz`, **`border-radius: 0`** (eckig, bewusst — nicht wieder abrunden), `--shadow-card`. Logo per `filter: invert(1) brightness(2)` weiß.
+
 ### Animations-Hooks (Markup → JS)
 | Attribut | Effekt |
 |---|---|
@@ -187,13 +197,14 @@ Sektionen sind standardmäßig per innerem `.container` (`max-width: var(--conte
 | `data-dropdown` | Custom-Dropdown (Modell-Auswahl + Ländervorwahl) |
 | `data-lenis-prevent` | Element scrollt nativ (Lenis kapert das Rad nicht) — z.B. Vorwahl-Menü |
 | `data-video-pingpong` | Video: Autoplay im View, keine UI, Vor-/Rückwärts-Loop mit 5s-Halt (`js/video.js`, nur index) |
+| `data-video-loop` | Video: Autoplay im View, keine UI, nahtloser Dauer-Loop, Pause außerhalb (`js/video.js`, nur index, Tagesablauf) |
 
 ## Inhalte & Assets
 
 - **Texte:** direkt im HTML, Sektions-Kommentare als Marker (`<!-- ===== SPECS 4C ===== -->`)
 - **Bilder:** Platzhalter (dunkle Slots). Echtes Bild mit Name aus `references/bildplan.md` in `assets/images/` ablegen → erscheint automatisch
 - **Illustrationen:** `assets/illustrations/` — gleicher Dateiname ersetzt die SVG
-- **Videos:** `assets/videos/` — Platzhalter-Slots, analog zu Bildern einpflegen. **Ausnahme:** die untere `.video-sec` auf `index.html` bindet `Explosion.mp4` mit Ping-Pong-Autoplay ein (siehe [`js/video.js`](#jsvideojs--explosion-video-ping-pong)).
+- **Videos:** `assets/videos/` — Platzhalter-Slots, analog zu Bildern einpflegen. **Ausnahmen (`index.html`):** die **obere** `.video-sec` bindet `Tagesablauf.mp4` als nahtlosen Dauer-Loop (`data-video-loop`), die **untere** `Explosion.mp4` mit Ping-Pong-Autoplay (`data-video-pingpong`) ein — beide via [`js/video.js`](#jsvideojs--videos-explosion-ping-pong--tagesablauf-loop). **Dateiname case-sensitiv** (GitHub Pages!): `Tagesablauf.mp4` (großes T).
 - **Fonts:** `fonts/` — Chunko Bold (`.otf/.ttf/.woff2`) + Inter Tight Regular/Medium (`.ttf/.woff2`); alle lokal, kein CDN
 
 ## Bekannte Einschränkungen

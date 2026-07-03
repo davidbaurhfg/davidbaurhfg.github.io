@@ -354,6 +354,14 @@ h1, h2, h3, h4 {
   aspect-ratio: 1856 / 1044;
   --ar: 1856 / 1044;
 }
+/* Header-Illustration statt Foto: vollständig sichtbar (contain), groß & zentriert, kein Kasten */
+.header__illu { width: 100%; display: flex; justify-content: center; }
+.header__illu img {
+  width: auto; height: auto;
+  max-width: min(100%, 820px);
+  max-height: clamp(340px, 52vw, 680px);
+  object-fit: contain;
+}
 
 /* ---------- 5.5 Footer ---------- */
 .footer {
@@ -386,6 +394,30 @@ h1, h2, h3, h4 {
 }
 @media (min-width: 900px) {
   .footer__grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+}
+
+/* ---------- 5.55 Bachelor-Credits (unter dem Footer, nur index.html; Figma 2626:10928) ---------- */
+.bachelor {
+  background: var(--carbon-schwarz); color: var(--schnee-weiss);
+  padding: clamp(5rem, 14vw, 13.75rem) var(--gutter) clamp(3rem, 6vw, 5rem);   /* Figma pt 220 / pb 80 */
+}
+.bachelor__inner {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: clamp(5rem, 16vw, 20rem);                                               /* Figma gap 320 */
+}
+.bachelor__top { display: flex; flex-direction: column; align-items: center; gap: clamp(2.5rem, 5vw, 5rem); } /* gap 80 */
+.bachelor__tag {
+  display: inline-flex; align-items: center; gap: .5rem; margin: 0;
+  font-family: var(--font-body); font-weight: 400; font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+}
+.bachelor__square { width: 16px; height: 16px; background: var(--flammen-orange); flex: 0 0 auto; }
+.bachelor__names { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: clamp(2.5rem, 6vw, 5rem); }
+.bachelor__name { display: flex; flex-direction: column; align-items: center; gap: .35rem; width: clamp(240px, 30vw, 419px); }
+.bachelor__name-title { font-family: var(--font-body); font-weight: 400; font-size: clamp(1.9rem, 3vw, 2.625rem); line-height: 1.2; }  /* 42px */
+.bachelor__name-role  { font-family: var(--font-body); font-weight: 400; font-size: clamp(1.05rem, 1.5vw, 1.5rem); line-height: 1.2; } /* 24px */
+.bachelor__meta {
+  margin: 0; font-family: var(--font-body); font-weight: 400; font-size: 1rem; line-height: 1.6;
+  color: rgba(230, 230, 230, .5);                                             /* Heller Stein 50% */
 }
 
 /* ---------- 5.6 Kontakt-Formular ---------- */
@@ -650,7 +682,7 @@ h1, h2, h3, h4 {
   .phase__pille { width: 100%; }
 }
 .container-badge {
-  background: var(--carbon-schwarz); border-radius: 18px;
+  background: var(--carbon-schwarz); border-radius: 0;
   padding: clamp(1.4rem, 2.5vw, 2.4rem) clamp(1.8rem, 3.5vw, 3.5rem);
   display: grid; place-items: center;
   box-shadow: var(--shadow-card);

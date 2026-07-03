@@ -1,6 +1,9 @@
 /* =====================================================================
    TREFF. — video.js
-   Explosion-Video (video-sec auf index.html). Hook: [data-video-pingpong].
+   Video-Sektionen auf index.html. Zwei Hooks:
+   • [data-video-pingpong] — Explosion-Video (Vor-/Rückwärts-Loop mit Halt, s.u.)
+   • [data-video-loop]      — Tagesablauf-Video: nahtloser Dauer-Loop (natives
+     `loop`), Autoplay im View, Pause außerhalb, keine Player-UI (s. setupLoop).
 
    • Autoplay erst, wenn der Videoframe in den Viewport scrollt (IntersectionObserver);
      pausiert wieder, sobald er den View verlässt (spart CPU beim Rückwärts-Seeking).
@@ -23,6 +26,38 @@
   function init() {
     var vids = document.querySelectorAll("[data-video-pingpong]");
     Array.prototype.forEach.call(vids, setup);
+    var loops = document.querySelectorAll("[data-video-loop]");
+    Array.prototype.forEach.call(loops, setupLoop);
+  }
+
+  // Nahtloser Dauer-Loop (natives `loop` → kein Cut am Übergang), Autoplay nur im View,
+  // Pause beim Verlassen (läuft nicht im Hintergrund weiter). Keine Player-UI im Markup.
+  function setupLoop(video) {
+    video.loop = true;                  // nahtloser Neustart durch den Browser
+    video.muted = true;                 // Pflicht für Autoplay ohne Nutzergeste
+    try { video.controls = false; } catch (e) {}
+
+    // Reduced Motion oder kein IntersectionObserver: statisch beim ersten Frame lassen.
+    if (TREFF.reduced || typeof IntersectionObserver === "undefined") {
+      try { video.pause(); } catch (e) {}
+      return;
+    }
+
+    var inView = false;
+    var play = function () {
+      var p = video.play();
+      if (p && typeof p.catch === "function") p.catch(function () {});
+    };
+
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        var visible = entries[i].isIntersecting && entries[i].intersectionRatio >= VIEW_RATIO;
+        if (visible && !inView) { inView = true; play(); }
+        else if (!visible && inView) { inView = false; try { video.pause(); } catch (e) {} }
+      }
+    }, { threshold: [0, VIEW_RATIO, 0.75] });
+
+    io.observe(video);
   }
 
   function setup(video) {
