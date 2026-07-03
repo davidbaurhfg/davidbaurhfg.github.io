@@ -8,11 +8,12 @@
 
   <base href="/" />
 
-
   <!-- Fonts vorab laden (meistgenutzte WOFF2) -->
   <link rel="preload" href="fonts/Chunko Bold.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/InterTight-Regular.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="css/style.css" />
+  <!-- Intro-Starter: Versteckt-Zustand VOR dem ersten Paint setzen (nur wenn Animation gewünscht) → kein Flackern. Steuerung in js/intro.js -->
+  <script>(function(){var s=location.search.indexOf('still=1')>-1;var r=s||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);if(!r)document.documentElement.classList.add('intro-active');})();</script>
 </head>
 
 <body>
@@ -515,5 +516,6 @@
   <script src="js/phasen.js"></script>
   <script src="js/carousel.js"></script>
   <script src="js/faq.js"></script>
-  <script src="js/video.js"></script></body>
+  <script src="js/video.js"></script>
+  <script src="js/intro.js"></script></body>
 </html>

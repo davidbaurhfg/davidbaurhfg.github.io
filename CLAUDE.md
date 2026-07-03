@@ -48,20 +48,31 @@ Spacing: 4/8-Raster (`--space-1` … `--space-10`). Type-Scale fluid (`clamp()`)
 ```
 js/lib/gsap.min.js → ScrollTrigger → Draggable → js/lib/lenis.min.js → app.js → parallax.js → phasen.js → carousel.js → faq.js
 ```
-In allen 5 HTML-Dateien identisch — **Ausnahme:** `index.html` lädt danach zusätzlich `js/video.js` (nur dort gibt es das Explosion-Video). Alle Libs liegen in `js/lib/` (lokal, kein CDN). `app.js` hängt sein `boot()` an `DOMContentLoaded` (bzw. ruft sofort, falls DOM schon geladen). Die Feature-Module (`parallax/phasen/carousel/faq`) registrieren beim Parsen nur ihre `TREFF.init*`-Funktionen; aufgerufen werden sie zentral aus `boot()`. **Es gibt keine Loader-/Intro-Animation mehr** — beim Öffnen landet man direkt auf dem Header.
+In allen 5 HTML-Dateien identisch — **Ausnahme:** `index.html` lädt danach zusätzlich `js/video.js` (Explosion-Video) **und `js/intro.js`** (Sweep-Starter, s.u.). Alle Libs liegen in `js/lib/` (lokal, kein CDN). `app.js` hängt sein `boot()` an `DOMContentLoaded` (bzw. ruft sofort, falls DOM schon geladen). Die Feature-Module (`parallax/phasen/carousel/faq`) registrieren beim Parsen nur ihre `TREFF.init*`-Funktionen; aufgerufen werden sie zentral aus `boot()`. **Nur `index.html` hat wieder ein Intro** (Sweep-Starter, s. [`js/intro.js`](#jsintrojs--sweep-starter-intro)); die anderen Seiten öffnen direkt auf dem Header.
 
 ### `js/app.js` — Motion-Core
 `boot()` ruft in dieser Reihenfolge auf (Quelle der Wahrheit, nicht die Definitionsreihenfolge im File):
 `initImageSlots()` → `initDropdown()` → `initSmoothScroll()` (Lenis ↔ GSAP-Ticker) → `initAnchorScroll()` → `initNav()` → **nur `hasGSAP && !REDUCED`:** `initReveals()` + `initParallax()` → **nur `hasGSAP`:** `initFloating()` + `initBounce()` → Feature-Module in fester Reihenfolge `["initPhasen","initParallaxExtra","initCarousel","initFAQ"]` (jeweils nur falls als `TREFF.*` registriert, `try/catch`-umschlossen) → `ScrollTrigger.refresh()`.
 
-**`initReveals()`**: Setzt `autoAlpha:0` auf alle `[data-reveal]`-Elemente beim Start. Elemente ohne `data-reveal`-Attribut werden **nie** ausgeblendet. Header-Logo (`.header__logo`) und Header-Hero (`.header__hero`) haben bewusst **kein** `data-reveal` → ab dem ersten Frame sichtbar (klassischer Header-Einstieg).
+**`initReveals()`**: Setzt `autoAlpha:0` auf alle `[data-reveal]`-Elemente beim Start. Elemente ohne `data-reveal`-Attribut werden **nie** von `initReveals` ausgeblendet. Header-Logo (`.header__logo`) und Header-Illustration (`.header__illu`) haben bewusst **kein** `data-reveal`. **Aber:** auf `index.html` blendet der Sweep-Starter ([`js/intro.js`](#jsintrojs--sweep-starter-intro)) sie beim Laden über die `html.intro-active`-Klasse zunächst aus und animiert sie rein; bei Reduced Motion / `?still=1` (keine `intro-active`-Klasse) sind sie ab dem ersten Frame sichtbar.
 
 **`initBounce()`**: Alle `.js-bounce`-Elemente skalieren auf hover auf `1.06` (GSAP), außer `.nav__pill--cta` → `1.03` (explizite Ausnahme in app.js).
 
 **`initNav()`**: Nur `is-scrolled`-Klasse per Scroll-Position, **kein** Auto-Hide beim Runterscrollen.
 
-### Loader / Intro-Animation — entfernt
-Es gibt **keinen Loader mehr** (`js/loader.js` gelöscht; Overlay-Markup, `body.is-loading`/`is-intro`, `.loader*`-CSS und der Script-Tag aus allen 5 Seiten entfernt). Beim Öffnen erscheint sofort der Header. Falls je wieder eine Intro gewünscht ist: neu bauen, nicht aus alten Ständen zurückholen.
+### `js/intro.js` — Sweep-Starter (Intro)
+**Nur `index.html`**, läuft **bei jedem Laden** (~2,1 s). Selbst-initialisierendes IIFE, geladen **nach** `js/video.js`. Editorial-Intro aus dem Zusammenspiel von Logo + Illustration:
+1. Ein oranger Balken (`.intro-sweep`, per JS in `.header__logo` erzeugt) wischt links→rechts; **synchron** wird das „TREFF."-Logo per `clip-path: inset(0 100%→0% 0 0)` „gemalt".
+2. Die gelbe Frau (`.header__illu img`) steigt mit `back.out`-Überschwung auf (`yPercent/scale/autoAlpha`).
+3. Winziger Logo-Settle-Puls; die **Nav** blendet ein — **nur `autoAlpha`, NIE Transform** (sonst bricht `translateX(-50%)`).
+
+- **Kein-Flackern-Start:** Ein **Inline-Script im `<head>`** setzt `html.intro-active` **vor dem ersten Paint** — aber nur, wenn Animation gewünscht (nicht bei `?still=1` / `prefers-reduced-motion`). CSS (`html.intro-active ...`) hält Logo (geclippt), Frau & Nav zunächst unsichtbar. `intro.js` animiert daraus rein.
+- **Robustheit:** Ein **einmaliges `finish()`** (aus `onComplete` **oder** 4-s-Failsafe-Timeout) killt die Timeline, entfernt `intro-active` + den Sweep-Balken, `clearProps` und gibt Lenis frei. Dadurch kann der Header **nie hängenbleiben** und die Timeline sich nach einem Hintergrund-Tab (rAF pausiert) **nicht nachträglich** über bereits gezeigten Inhalt legen.
+- **Scroll-Lock:** `TREFF.lenis.stop()` beim Start, `.start()` in `finish()`.
+- **Reduced Motion / kein GSAP:** kein Intro, Header sofort sichtbar (Guard ganz oben).
+- **Tuning:** `CONFIG`-Block oben in `js/intro.js` (Dauern, Ease, Balkenfarbe via `.intro-sweep` in CSS). Es werden **nur** Element-Eigenschaften animiert (kein SVG-Inlining) — Logo & Frau bleiben `<img src="…svg">`.
+
+**Historie:** Ein früherer Loader (`js/loader.js`) wurde 2026-06-29 entfernt; dieser Sweep-Starter ist ein **Neuaufbau** (nicht aus alten Ständen zurückgeholt).
 
 ### `js/phasen.js` — Scrollytelling
 Zickzack-Ablauf der 6 Bau-Phasen (nur `index.html`). Markup-Hook: `data-phasen` (Section) → `data-phasen-wrap` (Position-Parent) → `data-phasen-lines` (leeres `<svg>`, JS befüllt es) → je Phase `data-phase` mit `.phase--right`/`.phase--left` → `data-phase-end` (TREFF.-Badge). **Ungerade Phasen (1/3/5) = Box rechts (`.phase--right`), gerade (2/4/6) = Box links (`.phase--left`)** — falls das je gedreht werden soll, im HTML nur die `--right`/`--left`-Klassen tauschen (Figma + Referenz-Screenshot haben Phase 1 rechts).
@@ -113,7 +124,7 @@ Alle Feature-Module greifen über `window.TREFF` auf diese Werte zu — kein dir
 ### Nav (`.nav`)
 Fixed, **unten mittig** (`bottom: 24px; left: 50%; transform: translateX(-50%)`). Liquid-Glass-Pille. Hover-Farben: Home→Lila, Text→Dunkle-Fichte, CTA→Schulbus-Gelb.
 
-Die Nav ist ab dem ersten Frame sichtbar (kein Intro/Loader mehr). **Niemals GSAP auf die Nav-Transform anwenden** — würde die `translateX(-50%)`-Zentrierung zerstören.
+Die Nav ist ab dem ersten Frame sichtbar (außer auf `index.html`, wo der Sweep-Starter sie am Ende per **`autoAlpha`** einblendet). **Niemals GSAP auf die Nav-Transform anwenden** — würde die `translateX(-50%)`-Zentrierung zerstören (der Intro fadet deshalb nur `autoAlpha`, nicht `transform`).
 
 Desktop-only (≤600px ausgeblendet, Prio 2).
 

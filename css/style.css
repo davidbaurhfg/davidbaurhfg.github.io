@@ -363,6 +363,22 @@ h1, h2, h3, h4 {
   object-fit: contain;
 }
 
+/* ---------- Intro (Sweep-Starter, nur index.html; js/intro.js) ----------
+   `intro-active` wird synchron im <head> gesetzt (nur wenn Animation gewünscht)
+   → Versteckt-Zustand ab Frame 0, kein Flackern. intro.js animiert daraus rein
+   und entfernt die Klasse am Ende (Failsafe entfernt sie sonst nach 4s). */
+.header__logo { position: relative; }                                  /* Anker für den Sweep-Balken */
+html.intro-active .header__logo img { clip-path: inset(0 100% 0 0); }  /* Logo zunächst „unbemalt" */
+html.intro-active .header__illu img { opacity: 0; }
+html.intro-active .nav { opacity: 0; }
+.intro-sweep {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: clamp(6px, .7vw, 12px);
+  background: var(--flammen-orange);   /* Akzent leicht änderbar (z.B. --schulbus-gelb) */
+  box-shadow: 0 0 24px rgba(255, 76, 2, .35);   /* dezenter Glow → „heißer Marker" */
+  pointer-events: none; will-change: transform;
+}
+
 /* ---------- 5.5 Footer ---------- */
 .footer {
   background: var(--lila-traube);
